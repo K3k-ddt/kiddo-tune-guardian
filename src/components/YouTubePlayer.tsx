@@ -20,6 +20,8 @@ const YouTubePlayer = ({ videoId, onPlay, onPause, onEnded }: YouTubePlayerProps
   const playerIdRef = useRef(`youtube-player-${Math.random().toString(36).substr(2, 9)}`);
 
   useEffect(() => {
+    let playerInterval: number | undefined;
+
     // Load YouTube IFrame API
     if (!window.YT) {
       const tag = document.createElement('script');
@@ -47,17 +49,44 @@ const YouTubePlayer = ({ videoId, onPlay, onPause, onEnded }: YouTubePlayerProps
               fs: 0,
               modestbranding: 1,
               playsinline: 1,
+              rel: 0,
             },
             events: {
+              onReady: (event: any) => {
+                console.log('YouTube player ready, playing video');
+                event.target.playVideo();
+                
+                // Monitor player state to keep it playing
+                playerInterval = window.setInterval(() => {
+                  if (playerRef.current && typeof playerRef.current.getPlayerState === 'function') {
+                    const state = playerRef.current.getPlayerState();
+                    // If paused or buffering, try to play again
+                    if (state === window.YT.PlayerState.PAUSED || state === window.YT.PlayerState.BUFFERING) {
+                      console.log('Player paused/buffering, resuming playback');
+                      playerRef.current.playVideo();
+                    }
+                  }
+                }, 2000);
+              },
               onStateChange: (event: any) => {
+                console.log('Player state changed:', event.data);
                 if (event.data === window.YT.PlayerState.PLAYING) {
                   onPlay?.();
                 } else if (event.data === window.YT.PlayerState.PAUSED) {
                   onPause?.();
+                  // Try to resume playing if accidentally paused
+                  setTimeout(() => {
+                    if (playerRef.current && typeof playerRef.current.playVideo === 'function') {
+                      playerRef.current.playVideo();
+                    }
+                  }, 100);
                 } else if (event.data === window.YT.PlayerState.ENDED) {
                   onEnded?.();
                 }
               },
+              onError: (event: any) => {
+                console.error('YouTube player error:', event.data);
+              }
             },
           });
         } catch (error) {
@@ -73,6 +102,10 @@ const YouTubePlayer = ({ videoId, onPlay, onPause, onEnded }: YouTubePlayerProps
     }
 
     return () => {
+      if (playerInterval) {
+        clearInterval(playerInterval);
+      }
+      
       try {
         if (playerRef.current && typeof playerRef.current.destroy === 'function') {
           playerRef.current.destroy();

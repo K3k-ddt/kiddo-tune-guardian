@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { toast } from "sonner";
 import { LogOut, UserPlus, Clock, Shield, History as HistoryIcon } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import HistoryList from "@/components/HistoryList";
 
 const ParentDashboard = () => {
   const navigate = useNavigate();
@@ -182,9 +183,32 @@ const ParentDashboard = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground text-center py-8">
-                  Historia będzie dostępna po pierwszym użyciu aplikacji przez dzieci
-                </p>
+                {children.length === 0 ? (
+                  <p className="text-muted-foreground text-center py-8">
+                    Brak kont dzieci
+                  </p>
+                ) : (
+                  <Tabs defaultValue={children[0]?.id || "all"}>
+                    <TabsList>
+                      <TabsTrigger value="all">Wszystkie</TabsTrigger>
+                      {children.map((child) => (
+                        <TabsTrigger key={child.id} value={child.id}>
+                          {child.username}
+                        </TabsTrigger>
+                      ))}
+                    </TabsList>
+
+                    <TabsContent value="all">
+                      <HistoryList parentId={parentAccount.id} />
+                    </TabsContent>
+
+                    {children.map((child) => (
+                      <TabsContent key={child.id} value={child.id}>
+                        <HistoryList childId={child.id} />
+                      </TabsContent>
+                    ))}
+                  </Tabs>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
