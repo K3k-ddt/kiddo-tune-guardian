@@ -8,6 +8,9 @@ import ParentAuth from "./pages/ParentAuth";
 import ChildAuth from "./pages/ChildAuth";
 import Player from "./pages/Player";
 import ParentDashboard from "./pages/ParentDashboard";
+import AddChild from "./pages/AddChild";
+import Favorites from "./pages/Favorites";
+import History from "./pages/History";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -23,7 +26,10 @@ const App = () => (
           <Route path="/parent-auth" element={<ParentAuth />} />
           <Route path="/child-login" element={<ChildAuth />} />
           <Route path="/player" element={<Player />} />
+          <Route path="/favorites" element={<Favorites />} />
+          <Route path="/history" element={<History />} />
           <Route path="/parent-dashboard" element={<ParentDashboard />} />
+          <Route path="/parent-dashboard/add-child" element={<AddChild />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
