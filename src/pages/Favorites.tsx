@@ -108,7 +108,14 @@ const Favorites = () => {
                   <div className="flex gap-2">
                     <Button
                       onClick={() => {
-                        // Play this video
+                        // Pass video data to player via localStorage
+                        const videoData = {
+                          videoId: favorite.video_id,
+                          title: favorite.video_title,
+                          thumbnail: favorite.video_thumbnail,
+                          channelTitle: ''
+                        };
+                        localStorage.setItem('playVideo', JSON.stringify(videoData));
                         navigate("/player");
                       }}
                       size="sm"

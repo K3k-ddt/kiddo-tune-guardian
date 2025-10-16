@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { LogOut, UserPlus, Clock, Shield, History as HistoryIcon } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import HistoryList from "@/components/HistoryList";
+import BlockedContent from "@/components/BlockedContent";
 
 const ParentDashboard = () => {
   const navigate = useNavigate();
@@ -214,19 +215,7 @@ const ParentDashboard = () => {
           </TabsContent>
 
           <TabsContent value="blocked">
-            <Card>
-              <CardHeader>
-                <CardTitle>Zablokowane treści</CardTitle>
-                <CardDescription>
-                  Zarządzaj zablokowanymi piosenkami i frazami
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground text-center py-8">
-                  Nie zablokowano jeszcze żadnych treści
-                </p>
-              </CardContent>
-            </Card>
+            <BlockedContent parentId={parentAccount?.id} />
           </TabsContent>
 
           <TabsContent value="time">

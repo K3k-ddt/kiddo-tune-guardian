@@ -103,7 +103,14 @@ const History = () => {
                   </div>
                   <Button
                     onClick={() => {
-                      // Play this video again
+                      // Pass video data to player via localStorage
+                      const videoData = {
+                        videoId: item.video_id,
+                        title: item.video_title,
+                        thumbnail: item.video_thumbnail,
+                        channelTitle: ''
+                      };
+                      localStorage.setItem('playVideo', JSON.stringify(videoData));
                       navigate("/player");
                     }}
                     size="sm"

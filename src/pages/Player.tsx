@@ -18,6 +18,7 @@ const Player = () => {
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [parentId, setParentId] = useState<string>("");
+  const [isFavorite, setIsFavorite] = useState(false);
 
   useEffect(() => {
     const childData = localStorage.getItem("currentChild");
@@ -28,6 +29,14 @@ const Player = () => {
     const child = JSON.parse(childData);
     setCurrentChild(child);
     loadParentId(child.parent_id);
+
+    // Check if there's a video to play from history/favorites
+    const playVideoData = localStorage.getItem('playVideo');
+    if (playVideoData) {
+      const videoData = JSON.parse(playVideoData);
+      handlePlayVideo(videoData);
+      localStorage.removeItem('playVideo');
+    }
   }, [navigate]);
 
   const loadParentId = async (childParentId: string) => {
@@ -78,6 +87,9 @@ const Player = () => {
     setCurrentVideo(video);
     setIsPlaying(true);
 
+    // Check if video is in favorites
+    checkIfFavorite(video.videoId);
+
     // Save to playback history
     try {
       await supabase.from('playback_history').insert({
@@ -89,6 +101,21 @@ const Player = () => {
       });
     } catch (error) {
       console.error('Error saving to history:', error);
+    }
+  };
+
+  const checkIfFavorite = async (videoId: string) => {
+    try {
+      const { data } = await supabase
+        .from('favorites')
+        .select('id')
+        .eq('child_id', currentChild.id)
+        .eq('video_id', videoId)
+        .maybeSingle();
+      
+      setIsFavorite(!!data);
+    } catch (error) {
+      console.error('Error checking favorite:', error);
     }
   };
 
@@ -105,6 +132,7 @@ const Player = () => {
 
       if (existing) {
         await supabase.from('favorites').delete().eq('id', existing.id);
+        setIsFavorite(false);
         toast.success("Usunięto z ulubionych");
       } else {
         await supabase.from('favorites').insert({
@@ -113,6 +141,7 @@ const Player = () => {
           video_title: currentVideo.title,
           video_thumbnail: currentVideo.thumbnail
         });
+        setIsFavorite(true);
         toast.success("Dodano do ulubionych!");
       }
     } catch (error) {
@@ -247,8 +276,8 @@ const Player = () => {
                 size="lg"
                 className="rounded-2xl"
               >
-                <Heart className="mr-2 h-5 w-5" />
-                {isPlaying ? "Usuń z" : "Dodaj do"} ulubionych
+                <Heart className={`mr-2 h-5 w-5 ${isFavorite ? 'fill-red-500 text-red-500' : ''}`} />
+                {isFavorite ? "Usuń z" : "Dodaj do"} ulubionych
               </Button>
             )}
           </div>
