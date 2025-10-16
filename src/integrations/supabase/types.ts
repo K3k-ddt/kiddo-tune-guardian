@@ -122,6 +122,38 @@ export type Database = {
           },
         ]
       }
+      child_sessions: {
+        Row: {
+          child_id: string
+          created_at: string
+          expires_at: string
+          id: string
+          last_activity: string
+        }
+        Insert: {
+          child_id: string
+          created_at?: string
+          expires_at: string
+          id?: string
+          last_activity?: string
+        }
+        Update: {
+          child_id?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          last_activity?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "child_sessions_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "child_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       favorites: {
         Row: {
           added_at: string | null
@@ -250,9 +282,54 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      add_playback_history: {
+        Args: {
+          search_query_input: string
+          session_token: string
+          video_id_input: string
+          video_thumbnail_input: string
+          video_title_input: string
+        }
+        Returns: Json
+      }
+      get_children_for_login: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          avatar_color: string
+          id: string
+          username: string
+        }[]
+      }
+      get_current_child_from_session: {
+        Args: { session_token: string }
+        Returns: string
+      }
+      get_favorites: {
+        Args: { session_token: string }
+        Returns: {
+          added_at: string
+          id: string
+          video_id: string
+          video_thumbnail: string
+          video_title: string
+        }[]
+      }
       reset_child_daily_time: {
         Args: Record<PropertyKey, never>
         Returns: undefined
+      }
+      toggle_favorite: {
+        Args: {
+          session_token: string
+          video_id_input: string
+          video_thumbnail_input: string
+          video_title_input: string
+        }
+        Returns: Json
+      }
+      verify_child_pin: {
+        Args: { child_id_input: string; pin_input: string }
+        Returns: Json
       }
     }
     Enums: {

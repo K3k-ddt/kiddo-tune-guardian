@@ -13,23 +13,21 @@ const Favorites = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const childData = localStorage.getItem("currentChild");
-    if (!childData) {
+    const sessionData = localStorage.getItem("childSession");
+    if (!sessionData) {
       navigate("/child-login");
       return;
     }
-    const child = JSON.parse(childData);
-    setCurrentChild(child);
-    loadFavorites(child.id);
+    const session = JSON.parse(sessionData);
+    setCurrentChild(session);
+    loadFavorites(session.sessionToken);
   }, [navigate]);
 
-  const loadFavorites = async (childId: string) => {
+  const loadFavorites = async (sessionToken: string) => {
     try {
-      const { data, error } = await supabase
-        .from('favorites')
-        .select('*')
-        .eq('child_id', childId)
-        .order('added_at', { ascending: false });
+      const { data, error } = await supabase.rpc('get_favorites', {
+        session_token: sessionToken
+      });
 
       if (error) throw error;
       setFavorites(data || []);
@@ -40,10 +38,18 @@ const Favorites = () => {
     }
   };
 
-  const removeFavorite = async (favoriteId: string) => {
+  const removeFavorite = async (videoId: string) => {
     try {
-      await supabase.from('favorites').delete().eq('id', favoriteId);
-      setFavorites(favorites.filter(f => f.id !== favoriteId));
+      const { error } = await supabase.rpc('toggle_favorite', {
+        session_token: currentChild.sessionToken,
+        video_id_input: videoId,
+        video_title_input: '',
+        video_thumbnail_input: ''
+      });
+
+      if (error) throw error;
+      
+      setFavorites(favorites.filter(f => f.video_id !== videoId));
       toast.success("Usunięto z ulubionych");
     } catch (error) {
       toast.error("Błąd podczas usuwania");
@@ -124,7 +130,7 @@ const Favorites = () => {
                       <Play className="h-4 w-4" />
                     </Button>
                     <Button
-                      onClick={() => removeFavorite(favorite.id)}
+                      onClick={() => removeFavorite(favorite.video_id)}
                       size="sm"
                       variant="destructive"
                       className="rounded-xl"

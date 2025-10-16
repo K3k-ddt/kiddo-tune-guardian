@@ -19,10 +19,7 @@ const ChildAuth = () => {
 
   const loadChildren = async () => {
     try {
-      const { data, error } = await supabase
-        .from("child_accounts")
-        .select("*")
-        .order("username");
+      const { data, error } = await supabase.rpc('get_children_for_login');
 
       if (error) throw error;
       setChildren(data || []);
@@ -48,20 +45,27 @@ const ChildAuth = () => {
     if (!selectedChild) return;
 
     try {
-      if (selectedChild.pin_code === enteredPin) {
-        // Check if account is locked due to time limit
-        if (selectedChild.is_locked) {
-          toast.error("Czas minął! Poproś rodzica o odblokowanie.");
-          setPin("");
-          return;
-        }
+      const { data, error } = await supabase.rpc('verify_child_pin', {
+        child_id_input: selectedChild.id,
+        pin_input: enteredPin
+      });
 
-        // Store child session in localStorage
-        localStorage.setItem("currentChild", JSON.stringify(selectedChild));
-        toast.success(`Witaj, ${selectedChild.username}!`);
+      if (error) throw error;
+
+      const result = data as any;
+      if (result.success) {
+        // Store only session token in localStorage
+        localStorage.setItem("childSession", JSON.stringify({
+          sessionToken: result.session_token,
+          childId: result.child_id,
+          username: result.username,
+          avatarColor: result.avatar_color,
+          parentId: result.parent_id
+        }));
+        toast.success(`Witaj, ${result.username}!`);
         navigate("/player");
       } else {
-        toast.error("Nieprawidłowy PIN!");
+        toast.error(result.error || "Nieprawidłowy PIN!");
         setPin("");
       }
     } catch (error: any) {

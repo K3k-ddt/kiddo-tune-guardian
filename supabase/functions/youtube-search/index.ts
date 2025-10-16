@@ -5,6 +5,28 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Input validation helper
+const validateInput = (query: string, parentId?: string) => {
+  // Validate query length
+  if (query.length > 100) {
+    throw new Error('Search query too long (max 100 characters)');
+  }
+
+  // Validate query contains only safe characters
+  const validPattern = /^[a-zA-Z0-9\s\u0100-\u017F\u0400-\u04FF]+$/;
+  if (!validPattern.test(query)) {
+    throw new Error('Search query contains invalid characters');
+  }
+
+  // Validate parentId is UUID if provided
+  if (parentId) {
+    const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!uuidPattern.test(parentId)) {
+      throw new Error('Invalid parent ID format');
+    }
+  }
+};
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -16,6 +38,16 @@ serve(async (req) => {
     if (!query || !query.trim()) {
       return new Response(
         JSON.stringify({ error: 'Query is required' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Validate input
+    try {
+      validateInput(query.trim(), parentId);
+    } catch (validationError: any) {
+      return new Response(
+        JSON.stringify({ error: validationError.message }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }

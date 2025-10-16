@@ -13,14 +13,14 @@ const History = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const childData = localStorage.getItem("currentChild");
-    if (!childData) {
+    const sessionData = localStorage.getItem("childSession");
+    if (!sessionData) {
       navigate("/child-login");
       return;
     }
-    const child = JSON.parse(childData);
-    setCurrentChild(child);
-    loadHistory(child.id);
+    const session = JSON.parse(sessionData);
+    setCurrentChild(session);
+    loadHistory(session.childId);
   }, [navigate]);
 
   const loadHistory = async (childId: string) => {

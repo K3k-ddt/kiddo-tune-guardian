@@ -21,14 +21,14 @@ const Player = () => {
   const [isFavorite, setIsFavorite] = useState(false);
 
   useEffect(() => {
-    const childData = localStorage.getItem("currentChild");
-    if (!childData) {
+    const sessionData = localStorage.getItem("childSession");
+    if (!sessionData) {
       navigate("/child-login");
       return;
     }
-    const child = JSON.parse(childData);
-    setCurrentChild(child);
-    loadParentId(child.parent_id);
+    const session = JSON.parse(sessionData);
+    setCurrentChild(session);
+    loadParentId(session.parentId);
 
     // Check if there's a video to play from history/favorites
     const playVideoData = localStorage.getItem('playVideo');
@@ -44,7 +44,7 @@ const Player = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("currentChild");
+    localStorage.removeItem("childSession");
     toast.success("Wylogowano");
     navigate("/");
   };
@@ -92,12 +92,12 @@ const Player = () => {
 
     // Save to playback history
     try {
-      await supabase.from('playback_history').insert({
-        child_id: currentChild.id,
-        video_id: video.videoId,
-        video_title: video.title,
-        video_thumbnail: video.thumbnail,
-        search_query: searchQuery
+      await supabase.rpc('add_playback_history', {
+        session_token: currentChild.sessionToken,
+        video_id_input: video.videoId,
+        video_title_input: video.title,
+        video_thumbnail_input: video.thumbnail,
+        search_query_input: searchQuery
       });
     } catch (error) {
       console.error('Error saving to history:', error);
@@ -106,14 +106,11 @@ const Player = () => {
 
   const checkIfFavorite = async (videoId: string) => {
     try {
-      const { data } = await supabase
-        .from('favorites')
-        .select('id')
-        .eq('child_id', currentChild.id)
-        .eq('video_id', videoId)
-        .maybeSingle();
+      const { data } = await supabase.rpc('get_favorites', {
+        session_token: currentChild.sessionToken
+      });
       
-      setIsFavorite(!!data);
+      setIsFavorite(data?.some((f: any) => f.video_id === videoId) || false);
     } catch (error) {
       console.error('Error checking favorite:', error);
     }
@@ -123,24 +120,20 @@ const Player = () => {
     if (!currentVideo) return;
 
     try {
-      const { data: existing } = await supabase
-        .from('favorites')
-        .select('id')
-        .eq('child_id', currentChild.id)
-        .eq('video_id', currentVideo.videoId)
-        .maybeSingle();
+      const { data, error } = await supabase.rpc('toggle_favorite', {
+        session_token: currentChild.sessionToken,
+        video_id_input: currentVideo.videoId,
+        video_title_input: currentVideo.title,
+        video_thumbnail_input: currentVideo.thumbnail
+      });
 
-      if (existing) {
-        await supabase.from('favorites').delete().eq('id', existing.id);
+      if (error) throw error;
+
+      const result = data as any;
+      if (result.action === 'removed') {
         setIsFavorite(false);
         toast.success("Usunięto z ulubionych");
       } else {
-        await supabase.from('favorites').insert({
-          child_id: currentChild.id,
-          video_id: currentVideo.videoId,
-          video_title: currentVideo.title,
-          video_thumbnail: currentVideo.thumbnail
-        });
         setIsFavorite(true);
         toast.success("Dodano do ulubionych!");
       }
@@ -161,7 +154,7 @@ const Player = () => {
       <div className="flex justify-between items-center mb-8">
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 rounded-full flex items-center justify-center text-xl font-bold text-white"
-            style={{ background: currentChild.avatar_color }}
+            style={{ background: currentChild.avatarColor }}
           >
             {currentChild.username[0].toUpperCase()}
           </div>
