@@ -20,17 +20,14 @@ const History = () => {
     }
     const session = JSON.parse(sessionData);
     setCurrentChild(session);
-    loadHistory(session.childId);
+    loadHistory(session.sessionToken);
   }, [navigate]);
 
-  const loadHistory = async (childId: string) => {
+  const loadHistory = async (sessionToken: string) => {
     try {
-      const { data, error } = await supabase
-        .from('playback_history')
-        .select('*')
-        .eq('child_id', childId)
-        .order('played_at', { ascending: false })
-        .limit(50);
+      const { data, error } = await supabase.rpc('get_playback_history', {
+        session_token: sessionToken
+      });
 
       if (error) throw error;
       setHistory(data || []);

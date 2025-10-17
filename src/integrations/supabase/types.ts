@@ -314,6 +314,21 @@ export type Database = {
           video_title: string
         }[]
       }
+      get_playback_history: {
+        Args: { session_token: string }
+        Returns: {
+          id: string
+          played_at: string
+          search_query: string
+          video_id: string
+          video_thumbnail: string
+          video_title: string
+        }[]
+      }
+      get_time_usage: {
+        Args: { session_token: string }
+        Returns: Json
+      }
       reset_child_daily_time: {
         Args: Record<PropertyKey, never>
         Returns: undefined
@@ -325,6 +340,10 @@ export type Database = {
           video_thumbnail_input: string
           video_title_input: string
         }
+        Returns: Json
+      }
+      update_time_usage: {
+        Args: { minutes_used: number; session_token: string }
         Returns: Json
       }
       verify_child_pin: {
