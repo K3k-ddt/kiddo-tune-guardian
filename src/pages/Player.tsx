@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,6 +27,7 @@ const Player = () => {
   const [duration, setDuration] = useState(0);
   const [timeUsage, setTimeUsage] = useState({ used: 0, limit: 60, remaining: 60 });
   const timeTrackingRef = useRef<number>(0);
+  const loginTimeRef = useRef<number>(Date.now());
 
   useEffect(() => {
     const sessionData = localStorage.getItem("childSession");
@@ -47,19 +48,17 @@ const Player = () => {
       localStorage.removeItem('playVideo');
     }
 
-    // Track time usage every minute
+    // Track time usage every second (from login time)
     const timeTrackingInterval = setInterval(() => {
-      if (isPlaying) {
-        timeTrackingRef.current += 1;
-        if (timeTrackingRef.current >= 60) {
-          updateTimeUsage(session.sessionToken, 1);
-          timeTrackingRef.current = 0;
-        }
+      timeTrackingRef.current += 1;
+      if (timeTrackingRef.current >= 60) {
+        updateTimeUsage(session.sessionToken, 1);
+        timeTrackingRef.current = 0;
       }
     }, 1000);
 
     return () => clearInterval(timeTrackingInterval);
-  }, [navigate, isPlaying]);
+  }, [navigate]);
 
   const loadParentId = async (childParentId: string) => {
     setParentId(childParentId);
@@ -205,17 +204,22 @@ const Player = () => {
     }
   };
 
-  const handleSeek = (value: number[]) => {
+  const handleSeek = useCallback((value: number[]) => {
     const newTime = value[0];
     setCurrentTime(newTime);
     playerRef.current?.seekTo(newTime);
-  };
+  }, []);
 
-  const formatTime = (seconds: number) => {
+  const formatTime = useCallback((seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
     return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
+  }, []);
+
+  const handleTimeUpdate = useCallback((current: number, total: number) => {
+    setCurrentTime(current);
+    setDuration(total);
+  }, []);
 
   const checkIfFavorite = async (videoId: string) => {
     try {
@@ -460,10 +464,7 @@ const Player = () => {
               toast.info("Koniec listy odtwarzania");
             }
           }}
-          onTimeUpdate={(current, total) => {
-            setCurrentTime(current);
-            setDuration(total);
-          }}
+          onTimeUpdate={handleTimeUpdate}
         />
       )}
     </div>

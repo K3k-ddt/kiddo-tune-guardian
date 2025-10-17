@@ -29,6 +29,12 @@ const YouTubePlayer = forwardRef<YouTubePlayerHandle, YouTubePlayerProps>(
     const wrapperRef = useRef<HTMLDivElement>(null);
     const playerIdRef = useRef(`youtube-player-${Math.random().toString(36).substr(2, 9)}`);
     const timeUpdateIntervalRef = useRef<number | undefined>();
+    const callbacksRef = useRef({ onPlay, onPause, onEnded, onTimeUpdate });
+
+    // Update callbacks ref whenever they change
+    useEffect(() => {
+      callbacksRef.current = { onPlay, onPause, onEnded, onTimeUpdate };
+    }, [onPlay, onPause, onEnded, onTimeUpdate]);
 
     useImperativeHandle(ref, () => ({
       play: () => {
@@ -103,18 +109,18 @@ const YouTubePlayer = forwardRef<YouTubePlayerHandle, YouTubePlayerProps>(
                         typeof playerRef.current.getDuration === 'function') {
                       const currentTime = playerRef.current.getCurrentTime();
                       const duration = playerRef.current.getDuration();
-                      onTimeUpdate?.(currentTime, duration);
+                      callbacksRef.current.onTimeUpdate?.(currentTime, duration);
                     }
                   }, 500);
                 },
                 onStateChange: (event: any) => {
                   console.log('Player state changed:', event.data);
                   if (event.data === window.YT.PlayerState.PLAYING) {
-                    onPlay?.();
+                    callbacksRef.current.onPlay?.();
                   } else if (event.data === window.YT.PlayerState.PAUSED) {
-                    onPause?.();
+                    callbacksRef.current.onPause?.();
                   } else if (event.data === window.YT.PlayerState.ENDED) {
-                    onEnded?.();
+                    callbacksRef.current.onEnded?.();
                   }
                 },
                 onError: (event: any) => {
@@ -157,7 +163,7 @@ const YouTubePlayer = forwardRef<YouTubePlayerHandle, YouTubePlayerProps>(
           console.error('Error cleaning up YouTube player:', error);
         }
       };
-    }, [videoId, onPlay, onPause, onEnded, onTimeUpdate]);
+    }, [videoId]);
 
     return <div ref={wrapperRef} style={{ display: 'none' }} />;
   }
