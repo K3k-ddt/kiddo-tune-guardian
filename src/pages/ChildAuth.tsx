@@ -1,30 +1,53 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { Music2, ArrowLeft } from "lucide-react";
 
 const ChildAuth = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const [parentCode, setParentCode] = useState(searchParams.get('code') || '');
   const [children, setChildren] = useState<any[]>([]);
   const [selectedChild, setSelectedChild] = useState<any>(null);
   const [pin, setPin] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [showCodeInput, setShowCodeInput] = useState(!searchParams.get('code'));
 
   useEffect(() => {
-    loadChildren();
-  }, []);
+    if (parentCode && parentCode.length === 8) {
+      loadChildren();
+    }
+  }, [parentCode]);
 
   const loadChildren = async () => {
+    if (!parentCode || parentCode.length !== 8) {
+      toast.error('Wprowadź poprawny 8-znakowy kod rodzica');
+      return;
+    }
+    
+    setLoading(true);
     try {
-      const { data, error } = await supabase.rpc('get_children_for_login');
+      const { data, error } = await supabase.rpc('get_children_for_login', {
+        parent_code_input: parentCode
+      });
 
       if (error) throw error;
-      setChildren(data || []);
+      
+      if (!data || data.length === 0) {
+        toast.error('Nie znaleziono profili dla tego kodu');
+        setShowCodeInput(true);
+        setChildren([]);
+      } else {
+        setChildren(data);
+        setShowCodeInput(false);
+      }
     } catch (error: any) {
       toast.error("Nie można załadować kont dzieci");
+      setShowCodeInput(true);
     } finally {
       setLoading(false);
     }
@@ -74,6 +97,57 @@ const ChildAuth = () => {
     }
   };
 
+  if (showCodeInput) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4" style={{
+        background: "linear-gradient(135deg, hsl(260 80% 60%), hsl(180 80% 60%))"
+      }}>
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <Button
+              onClick={() => navigate("/")}
+              variant="ghost"
+              size="sm"
+              className="absolute left-4 top-4"
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+            <div className="flex justify-center mb-4">
+              <div className="w-20 h-20 rounded-full flex items-center justify-center" style={{
+                background: "linear-gradient(135deg, hsl(260 100% 75%), hsl(30 100% 80%))"
+              }}>
+                <Music2 className="w-10 h-10 text-white" />
+              </div>
+            </div>
+            <CardTitle className="text-2xl">Logowanie dziecka</CardTitle>
+            <CardDescription>
+              Wprowadź kod dostępu otrzymany od rodzica
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <Input
+                type="text"
+                value={parentCode}
+                onChange={(e) => setParentCode(e.target.value.toUpperCase())}
+                placeholder="KOD RODZICA"
+                maxLength={8}
+                className="text-center text-2xl tracking-widest font-mono"
+              />
+            </div>
+            <Button 
+              onClick={loadChildren}
+              disabled={loading || parentCode.length !== 8}
+              className="w-full h-12 text-lg"
+            >
+              {loading ? "Ładowanie..." : "Dalej"}
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{
@@ -91,12 +165,12 @@ const ChildAuth = () => {
       }}>
         <div className="w-full max-w-2xl">
           <Button
-            onClick={() => navigate("/")}
+            onClick={() => setShowCodeInput(true)}
             variant="ghost"
             className="mb-4 text-white hover:bg-white/20"
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Powrót
+            Zmień kod
           </Button>
           <Card>
             <CardHeader className="text-center">

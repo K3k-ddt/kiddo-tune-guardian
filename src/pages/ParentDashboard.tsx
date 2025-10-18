@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { LogOut, UserPlus, Clock, Shield, History as HistoryIcon } from "lucide-react";
+import { LogOut, UserPlus, Clock, Shield, History as HistoryIcon, Copy, Check, QrCode } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import HistoryList from "@/components/HistoryList";
 import BlockedContent from "@/components/BlockedContent";
@@ -14,6 +14,7 @@ const ParentDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [parentAccount, setParentAccount] = useState<any>(null);
   const [children, setChildren] = useState<any[]>([]);
+  const [copiedCode, setCopiedCode] = useState(false);
 
   useEffect(() => {
     checkAuth();
@@ -28,10 +29,10 @@ const ParentDashboard = () => {
         return;
       }
 
-      // Load parent account
+      // Load parent account with parent_code
       const { data: parentData, error: parentError } = await supabase
         .from("parent_accounts")
-        .select("*")
+        .select("id, user_id, created_at, parent_code")
         .eq("user_id", user.id)
         .single();
 
@@ -81,6 +82,22 @@ const ParentDashboard = () => {
     navigate("/");
   };
 
+  const copyParentCode = async () => {
+    if (parentAccount?.parent_code) {
+      await navigator.clipboard.writeText(parentAccount.parent_code);
+      setCopiedCode(true);
+      toast.success('Kod skopiowany do schowka!');
+      setTimeout(() => setCopiedCode(false), 2000);
+    }
+  };
+
+  const getChildLoginLink = () => {
+    if (parentAccount?.parent_code) {
+      return `${window.location.origin}/child-login?code=${parentAccount.parent_code}`;
+    }
+    return '';
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -102,6 +119,47 @@ const ParentDashboard = () => {
             Wyloguj
           </Button>
         </div>
+
+        {/* Parent Code Card */}
+        <Card className="mb-6 bg-white/95 backdrop-blur-sm">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <QrCode className="h-5 w-5" />
+              Kod dostępu dla dzieci
+            </CardTitle>
+            <CardDescription>
+              Udostępnij ten kod dzieciom, aby mogły się zalogować
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center gap-4">
+              <div className="flex-1 bg-gradient-to-r from-purple-100 to-blue-100 rounded-lg p-6 text-center">
+                <div className="text-4xl font-mono font-bold tracking-widest text-purple-900">
+                  {parentAccount?.parent_code || 'Ładowanie...'}
+                </div>
+              </div>
+              <Button onClick={copyParentCode} variant="outline" size="lg" className="h-16">
+                {copiedCode ? (
+                  <>
+                    <Check className="mr-2 h-5 w-5" />
+                    Skopiowano
+                  </>
+                ) : (
+                  <>
+                    <Copy className="mr-2 h-5 w-5" />
+                    Kopiuj
+                  </>
+                )}
+              </Button>
+            </div>
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <p className="text-sm font-medium text-blue-900 mb-2">Link bezpośredni:</p>
+              <code className="text-xs text-blue-700 break-all block bg-white p-2 rounded">
+                {getChildLoginLink()}
+              </code>
+            </div>
+          </CardContent>
+        </Card>
 
         <Tabs defaultValue="children" className="space-y-6">
           <TabsList className="bg-white/20 backdrop-blur-sm">

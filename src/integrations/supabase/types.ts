@@ -193,16 +193,19 @@ export type Database = {
         Row: {
           created_at: string | null
           id: string
+          parent_code: string | null
           user_id: string
         }
         Insert: {
           created_at?: string | null
           id?: string
+          parent_code?: string | null
           user_id: string
         }
         Update: {
           created_at?: string | null
           id?: string
+          parent_code?: string | null
           user_id?: string
         }
         Relationships: [
@@ -211,6 +214,38 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: true
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pin_attempts: {
+        Row: {
+          attempt_time: string
+          child_id: string
+          id: string
+          ip_address: string | null
+          was_successful: boolean
+        }
+        Insert: {
+          attempt_time?: string
+          child_id: string
+          id?: string
+          ip_address?: string | null
+          was_successful?: boolean
+        }
+        Update: {
+          attempt_time?: string
+          child_id?: string
+          id?: string
+          ip_address?: string | null
+          was_successful?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pin_attempts_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "child_accounts"
             referencedColumns: ["id"]
           },
         ]
@@ -293,7 +328,7 @@ export type Database = {
         Returns: Json
       }
       get_children_for_login: {
-        Args: Record<PropertyKey, never>
+        Args: Record<PropertyKey, never> | { parent_code_input: string }
         Returns: {
           avatar_color: string
           id: string
