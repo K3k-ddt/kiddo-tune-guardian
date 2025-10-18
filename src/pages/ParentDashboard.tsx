@@ -163,7 +163,11 @@ const ParentDashboard = () => {
                               </p>
                             </div>
                           </div>
-                          <Button variant="outline" size="sm">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => navigate(`/parent-dashboard/edit-child/${child.id}`)}
+                          >
                             Edytuj
                           </Button>
                         </CardContent>

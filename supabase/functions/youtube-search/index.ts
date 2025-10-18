@@ -100,6 +100,8 @@ serve(async (req) => {
       searchUrl.searchParams.append('type', 'video');
       searchUrl.searchParams.append('videoCategoryId', '10'); // Music category
       searchUrl.searchParams.append('safeSearch', 'strict');
+      searchUrl.searchParams.append('regionCode', 'PL'); // Priorytet dla Polski
+      searchUrl.searchParams.append('relevanceLanguage', 'pl'); // Preferuj język polski
       searchUrl.searchParams.append('maxResults', '20');
       searchUrl.searchParams.append('key', YOUTUBE_API_KEY);
 
@@ -136,6 +138,8 @@ serve(async (req) => {
     searchUrl.searchParams.append('type', 'video');
     searchUrl.searchParams.append('videoCategoryId', '10');
     searchUrl.searchParams.append('safeSearch', 'strict');
+    searchUrl.searchParams.append('regionCode', 'PL'); // Priorytet dla Polski
+    searchUrl.searchParams.append('relevanceLanguage', 'pl'); // Preferuj język polski
     searchUrl.searchParams.append('maxResults', '20');
     searchUrl.searchParams.append('key', YOUTUBE_API_KEY);
 

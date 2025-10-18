@@ -9,6 +9,7 @@ import ChildAuth from "./pages/ChildAuth";
 import Player from "./pages/Player";
 import ParentDashboard from "./pages/ParentDashboard";
 import AddChild from "./pages/AddChild";
+import EditChild from "./pages/EditChild";
 import Favorites from "./pages/Favorites";
 import History from "./pages/History";
 import NotFound from "./pages/NotFound";
@@ -30,6 +31,7 @@ const App = () => (
           <Route path="/history" element={<History />} />
           <Route path="/parent-dashboard" element={<ParentDashboard />} />
           <Route path="/parent-dashboard/add-child" element={<AddChild />} />
+          <Route path="/parent-dashboard/edit-child/:childId" element={<EditChild />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
