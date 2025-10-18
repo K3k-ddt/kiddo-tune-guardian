@@ -207,8 +207,15 @@ const Player = () => {
   const handleSeek = useCallback((value: number[]) => {
     const newTime = value[0];
     setCurrentTime(newTime);
-    playerRef.current?.seekTo(newTime);
   }, []);
+
+  const handleSeekCommit = useCallback((value: number[]) => {
+    const newTime = value[0];
+    playerRef.current?.seekTo(newTime);
+    if (isPlaying) {
+      playerRef.current?.play();
+    }
+  }, [isPlaying]);
 
   const formatTime = useCallback((seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -218,7 +225,11 @@ const Player = () => {
 
   const handleTimeUpdate = useCallback((current: number, total: number) => {
     setCurrentTime(current);
-    setDuration(total);
+    setDuration((prev) => {
+      const next = Math.floor(total || 0);
+      const prevInt = Math.floor(prev || 0);
+      return next > 0 ? Math.max(prevInt, next) : prevInt;
+    });
   }, []);
 
   const checkIfFavorite = async (videoId: string) => {
@@ -364,6 +375,7 @@ const Player = () => {
                   max={duration || 100}
                   step={1}
                   onValueChange={handleSeek}
+                  onValueCommit={handleSeekCommit}
                   className="w-full"
                 />
                 <div className="flex justify-between text-sm text-muted-foreground">

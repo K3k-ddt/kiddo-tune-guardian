@@ -48,8 +48,8 @@ const Index = () => {
           <Button
             onClick={() => navigate("/parent-auth")}
             size="lg"
-            variant="outline"
-            className="w-full max-w-md h-16 text-xl font-bold rounded-3xl border-2 border-white text-white hover:bg-white hover:text-primary"
+            variant="ghost"
+            className="w-full max-w-md h-16 text-xl font-bold rounded-3xl border border-white/30 bg-white/10 text-white hover:bg-white/20 hover:text-white"
           >
             <Shield className="mr-2 h-6 w-6" />
             Panel Rodzica

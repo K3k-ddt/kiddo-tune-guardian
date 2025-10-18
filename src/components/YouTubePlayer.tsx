@@ -86,8 +86,8 @@ const YouTubePlayer = forwardRef<YouTubePlayerHandle, YouTubePlayerProps>(
 
           try {
             playerRef.current = new window.YT.Player(playerIdRef.current, {
-              height: '0',
-              width: '0',
+              height: '1',
+              width: '1',
               videoId: videoId,
               playerVars: {
                 autoplay: 1,
@@ -165,7 +165,20 @@ const YouTubePlayer = forwardRef<YouTubePlayerHandle, YouTubePlayerProps>(
       };
     }, [videoId]);
 
-    return <div ref={wrapperRef} style={{ display: 'none' }} />;
+    return (
+      <div
+        ref={wrapperRef}
+        style={{
+          position: 'absolute',
+          width: 1,
+          height: 1,
+          opacity: 0,
+          pointerEvents: 'none',
+          left: -9999,
+          top: 0,
+        }}
+      />
+    );
   }
 );
 
