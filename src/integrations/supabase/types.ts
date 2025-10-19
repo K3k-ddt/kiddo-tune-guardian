@@ -83,6 +83,7 @@ export type Database = {
           id: string
           is_locked: boolean | null
           last_reset_date: string | null
+          limit_reset_time: string | null
           parent_id: string
           pin_code: string
           time_used_today: number | null
@@ -95,6 +96,7 @@ export type Database = {
           id?: string
           is_locked?: boolean | null
           last_reset_date?: string | null
+          limit_reset_time?: string | null
           parent_id: string
           pin_code: string
           time_used_today?: number | null
@@ -107,6 +109,7 @@ export type Database = {
           id?: string
           is_locked?: boolean | null
           last_reset_date?: string | null
+          limit_reset_time?: string | null
           parent_id?: string
           pin_code?: string
           time_used_today?: number | null
@@ -328,10 +331,11 @@ export type Database = {
         Returns: Json
       }
       get_children_for_login: {
-        Args: Record<PropertyKey, never> | { parent_code_input: string }
+        Args: Record<PropertyKey, never>
         Returns: {
           avatar_color: string
           id: string
+          parent_id: string
           username: string
         }[]
       }

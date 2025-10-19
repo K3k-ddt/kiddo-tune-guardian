@@ -76,12 +76,26 @@ const ParentDashboard = () => {
     setChildren(data || []);
   };
 
+  const resetChildUsage = async (childId: string) => {
+    if (!parentAccount?.id) return;
+    const { error } = await supabase
+      .from("child_accounts")
+      .update({ time_used_today: 0, is_locked: false, limit_reset_time: new Date().toISOString() })
+      .eq("id", childId)
+      .eq("parent_id", parentAccount.id);
+    if (error) {
+      toast.error("Nie udało się zresetować limitu");
+      return;
+    }
+    toast.success("Limit zresetowany");
+    setChildren((prev) => prev.map((c) => c.id === childId ? { ...c, time_used_today: 0, is_locked: false } : c));
+  };
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
     toast.success("Wylogowano");
     navigate("/");
   };
-
   const copyParentCode = async () => {
     if (parentAccount?.parent_code) {
       await navigator.clipboard.writeText(parentAccount.parent_code);
