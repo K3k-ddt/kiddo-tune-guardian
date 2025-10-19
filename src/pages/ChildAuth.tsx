@@ -1,30 +1,36 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-
 import { toast } from "sonner";
 import { Music2, ArrowLeft } from "lucide-react";
 
 const ChildAuth = () => {
   const navigate = useNavigate();
-  
-  
+  const { parentCode } = useParams<{ parentCode?: string }>();
   const [children, setChildren] = useState<any[]>([]);
   const [selectedChild, setSelectedChild] = useState<any>(null);
   const [pin, setPin] = useState("");
-  const [loading, setLoading] = useState(false);
-  
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     loadChildren();
-  }, []);
+  }, [parentCode]);
 
   const loadChildren = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase.rpc('get_children_for_login');
+      let data, error;
+      if (parentCode) {
+        // Load children for specific parent code
+        ({ data, error } = await supabase.rpc('get_children_for_code', {
+          parent_code_input: parentCode
+        }));
+      } else {
+        // Load all children
+        ({ data, error } = await supabase.rpc('get_children_for_login'));
+      }
       if (error) throw error;
       setChildren(data || []);
     } catch (error: any) {

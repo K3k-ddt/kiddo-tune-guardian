@@ -26,6 +26,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/parent-auth" element={<ParentAuth />} />
           <Route path="/child-login" element={<ChildAuth />} />
+          <Route path="/child-login/:parentCode" element={<ChildAuth />} />
           <Route path="/player" element={<Player />} />
           <Route path="/favorites" element={<Favorites />} />
           <Route path="/history" element={<History />} />

@@ -107,7 +107,7 @@ const ParentDashboard = () => {
 
   const getChildLoginLink = () => {
     if (parentAccount?.parent_code) {
-      return `${window.location.origin}/child-login?code=${parentAccount.parent_code}`;
+      return `${window.location.origin}/child-login/${parentAccount.parent_code}`;
     }
     return '';
   };
@@ -331,6 +331,14 @@ const ParentDashboard = () => {
                               }}
                             />
                           </div>
+                          <Button
+                            onClick={() => resetChildUsage(child.id)}
+                            variant="outline"
+                            size="sm"
+                            className="w-full mt-2"
+                          >
+                            Resetuj limit czasu
+                          </Button>
                         </div>
                       </CardContent>
                     </Card>

@@ -330,6 +330,15 @@ export type Database = {
         }
         Returns: Json
       }
+      get_children_for_code: {
+        Args: { parent_code_input: string }
+        Returns: {
+          avatar_color: string
+          id: string
+          parent_id: string
+          username: string
+        }[]
+      }
       get_children_for_login: {
         Args: Record<PropertyKey, never>
         Returns: {
