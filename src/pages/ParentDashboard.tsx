@@ -91,6 +91,31 @@ const ParentDashboard = () => {
     setChildren((prev) => prev.map((c) => c.id === childId ? { ...c, time_used_today: 0, is_locked: false } : c));
   };
 
+  const deleteChild = async (childId: string, childUsername: string) => {
+    if (!confirm(`Czy na pewno chcesz usunąć konto dziecka "${childUsername}"? Ta operacja jest nieodwracalna i usunie wszystkie powiązane dane (historię, ulubione, sesje).`)) {
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase.rpc('delete_child_account', {
+        child_id_input: childId
+      });
+
+      if (error) throw error;
+      
+      const result = data as any;
+      if (!result.success) {
+        throw new Error(result.error || 'Nie udało się usunąć konta');
+      }
+
+      toast.success('Konto dziecka zostało usunięte');
+      loadChildren(parentAccount?.id);
+    } catch (error: any) {
+      console.error('Error deleting child:', error);
+      toast.error('Błąd podczas usuwania konta: ' + error.message);
+    }
+  };
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
     toast.success("Wylogowano");
@@ -338,6 +363,14 @@ const ParentDashboard = () => {
                             className="w-full mt-2"
                           >
                             Resetuj limit czasu
+                          </Button>
+                          <Button
+                            onClick={() => deleteChild(child.id, child.username)}
+                            variant="destructive"
+                            size="sm"
+                            className="w-full mt-2"
+                          >
+                            Usuń konto
                           </Button>
                         </div>
                       </CardContent>

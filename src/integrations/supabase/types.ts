@@ -330,6 +330,7 @@ export type Database = {
         }
         Returns: Json
       }
+      delete_child_account: { Args: { child_id_input: string }; Returns: Json }
       get_children_for_code: {
         Args: { parent_code_input: string }
         Returns: {
@@ -340,7 +341,7 @@ export type Database = {
         }[]
       }
       get_children_for_login: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           avatar_color: string
           id: string
@@ -373,14 +374,8 @@ export type Database = {
           video_title: string
         }[]
       }
-      get_time_usage: {
-        Args: { session_token: string }
-        Returns: Json
-      }
-      reset_child_daily_time: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
+      get_time_usage: { Args: { session_token: string }; Returns: Json }
+      reset_child_daily_time: { Args: never; Returns: undefined }
       toggle_favorite: {
         Args: {
           session_token: string

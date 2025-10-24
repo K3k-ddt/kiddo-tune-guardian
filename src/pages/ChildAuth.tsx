@@ -23,18 +23,25 @@ const ChildAuth = () => {
     try {
       let data, error;
       if (parentCode) {
-        // Load children for specific parent code
+        // Load children for specific parent code (no auth required)
         ({ data, error } = await supabase.rpc('get_children_for_code', {
           parent_code_input: parentCode
         }));
       } else {
-        // Load all children
+        // Load only authenticated parent's children
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+          toast.error('Musisz się zalogować jako rodzic');
+          navigate('/parent-auth');
+          return;
+        }
         ({ data, error } = await supabase.rpc('get_children_for_login'));
       }
       if (error) throw error;
       setChildren(data || []);
     } catch (error: any) {
-      toast.error("Nie można załadować kont dzieci");
+      console.error('Error loading children:', error);
+      toast.error('Błąd podczas ładowania kont dzieci');
     } finally {
       setLoading(false);
     }

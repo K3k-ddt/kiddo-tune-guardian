@@ -9,6 +9,7 @@ import { Search, Heart, History, LogOut, Play, Pause, SkipBack, SkipForward, Loa
 import { supabase } from "@/integrations/supabase/client";
 import VoiceSearch from "@/components/VoiceSearch";
 import YouTubePlayer, { YouTubePlayerHandle } from "@/components/YouTubePlayer";
+import { App as CapacitorApp } from '@capacitor/app';
 
 const Player = () => {
   const navigate = useNavigate();
@@ -48,6 +49,15 @@ const Player = () => {
       localStorage.removeItem('playVideo');
     }
 
+    // Keep app running in background (for music playback)
+    let appStateListener: any = null;
+    CapacitorApp.addListener('appStateChange', ({ isActive }) => {
+      console.log('App state changed. Is active?', isActive);
+      // Audio continues playing when app goes to background
+    }).then(listener => {
+      appStateListener = listener;
+    });
+
     // Track time usage every second (from login time)
     const timeTrackingInterval = setInterval(() => {
       timeTrackingRef.current += 1;
@@ -57,7 +67,12 @@ const Player = () => {
       }
     }, 1000);
 
-    return () => clearInterval(timeTrackingInterval);
+    return () => {
+      clearInterval(timeTrackingInterval);
+      if (appStateListener) {
+        appStateListener.remove();
+      }
+    };
   }, [navigate]);
 
   const loadParentId = async (childParentId: string) => {
