@@ -5,8 +5,10 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { toast } from "sonner";
-import { Search, Heart, History, LogOut, Play, Pause, SkipBack, SkipForward, Loader2, Clock } from "lucide-react";
+import { Search, Heart, History, LogOut, Play, Pause, SkipBack, SkipForward, Loader2, Clock, Palette } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import VoiceSearch from "@/components/VoiceSearch";
 import YouTubePlayer, { YouTubePlayerHandle } from "@/components/YouTubePlayer";
@@ -21,6 +23,24 @@ const SEARCH_SUGGESTIONS = [
   "muzyka relaksacyjna",
   "przygody",
   "nauka liczenia"
+];
+
+const COLOR_THEMES = [
+  { name: "Fioletowo-błękitny", gradient: "linear-gradient(135deg, hsl(260 80% 60%), hsl(180 80% 60%))", primary: "hsl(260 80% 60%)" },
+  { name: "Różowo-pomarańczowy", gradient: "linear-gradient(135deg, hsl(340 80% 65%), hsl(30 90% 65%))", primary: "hsl(340 80% 65%)" },
+  { name: "Zielono-żółty", gradient: "linear-gradient(135deg, hsl(120 70% 55%), hsl(60 90% 60%))", primary: "hsl(120 70% 55%)" },
+  { name: "Niebieski ocean", gradient: "linear-gradient(135deg, hsl(200 90% 55%), hsl(220 85% 65%))", primary: "hsl(200 90% 55%)" },
+  { name: "Czerwono-różowy", gradient: "linear-gradient(135deg, hsl(0 85% 60%), hsl(320 80% 65%))", primary: "hsl(0 85% 60%)" },
+  { name: "Pomarańczowo-żółty", gradient: "linear-gradient(135deg, hsl(25 95% 60%), hsl(50 95% 60%))", primary: "hsl(25 95% 60%)" },
+  { name: "Turkusowo-zielony", gradient: "linear-gradient(135deg, hsl(170 80% 50%), hsl(140 70% 55%))", primary: "hsl(170 80% 50%)" },
+  { name: "Fioletowo-różowy", gradient: "linear-gradient(135deg, hsl(280 75% 60%), hsl(320 80% 65%))", primary: "hsl(280 75% 60%)" },
+  { name: "Niebieski neon", gradient: "linear-gradient(135deg, hsl(190 90% 55%), hsl(280 80% 60%))", primary: "hsl(190 90% 55%)" },
+  { name: "Tęczowy", gradient: "linear-gradient(135deg, hsl(0 85% 60%), hsl(60 90% 60%), hsl(180 80% 55%))", primary: "hsl(0 85% 60%)" },
+  { name: "Lawendowy", gradient: "linear-gradient(135deg, hsl(260 60% 65%), hsl(280 50% 70%))", primary: "hsl(260 60% 65%)" },
+  { name: "Koralowy", gradient: "linear-gradient(135deg, hsl(15 90% 65%), hsl(340 85% 65%))", primary: "hsl(15 90% 65%)" },
+  { name: "Miętowy", gradient: "linear-gradient(135deg, hsl(160 70% 60%), hsl(180 60% 70%))", primary: "hsl(160 70% 60%)" },
+  { name: "Słoneczny", gradient: "linear-gradient(135deg, hsl(45 100% 60%), hsl(30 100% 65%))", primary: "hsl(45 100% 60%)" },
+  { name: "Jagodowy", gradient: "linear-gradient(135deg, hsl(270 70% 55%), hsl(290 65% 60%))", primary: "hsl(270 70% 55%)" },
 ];
 
 const Player = () => {
@@ -39,6 +59,8 @@ const Player = () => {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [timeUsage, setTimeUsage] = useState({ used: 0, limit: 60, remaining: 60 });
+  const [selectedTheme, setSelectedTheme] = useState(0);
+  const [showLogoutDialog, setShowLogoutDialog] = useState(false);
   const timeTrackingRef = useRef<number>(0);
   const loginTimeRef = useRef<number>(Date.now());
 
@@ -52,6 +74,12 @@ const Player = () => {
     setCurrentChild(session);
     loadParentId(session.parentId);
     loadTimeUsage(session.sessionToken);
+    
+    // Load saved theme
+    const savedTheme = localStorage.getItem(`theme_${session.childId}`);
+    if (savedTheme) {
+      setSelectedTheme(parseInt(savedTheme));
+    }
 
     // Check if there's a video to play from history/favorites
     const playVideoData = localStorage.getItem('playVideo');
@@ -150,6 +178,13 @@ const Player = () => {
     localStorage.removeItem("childSession");
     toast.success("Wylogowano");
     navigate("/");
+  };
+
+  const handleThemeChange = (index: number) => {
+    setSelectedTheme(index);
+    if (currentChild) {
+      localStorage.setItem(`theme_${currentChild.childId}`, index.toString());
+    }
   };
 
   const handleSearch = async (query?: string) => {
@@ -303,7 +338,7 @@ const Player = () => {
 
   return (
     <div className="min-h-screen p-4" style={{
-      background: "linear-gradient(135deg, hsl(260 80% 60%), hsl(180 80% 60%))"
+      background: COLOR_THEMES[selectedTheme].gradient
     }}>
       {/* Header */}
       <div className="flex justify-between items-center mb-8">
@@ -324,10 +359,56 @@ const Player = () => {
             </div>
           </div>
         </div>
-        <Button onClick={handleLogout} variant="ghost" className="text-white hover:bg-white/20">
-          <LogOut className="h-5 w-5" />
-        </Button>
+        <div className="flex items-center gap-2">
+          {/* Theme Selector */}
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="ghost" size="sm" className="text-white hover:bg-white/20">
+                <Palette className="h-5 w-5" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-80">
+              <div className="space-y-3">
+                <h3 className="font-semibold text-sm">Wybierz kolor aplikacji</h3>
+                <div className="grid grid-cols-5 gap-2">
+                  {COLOR_THEMES.map((theme, index) => (
+                    <button
+                      key={index}
+                      onClick={() => handleThemeChange(index)}
+                      className={`w-12 h-12 rounded-full transition-all ${
+                        selectedTheme === index ? 'ring-4 ring-primary scale-110' : 'hover:scale-105'
+                      }`}
+                      style={{ background: theme.gradient }}
+                      title={theme.name}
+                    />
+                  ))}
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
+          
+          {/* Logout Button */}
+          <Button onClick={() => setShowLogoutDialog(true)} variant="ghost" size="sm" className="text-white hover:bg-white/20">
+            <LogOut className="h-5 w-5" />
+          </Button>
+        </div>
       </div>
+
+      {/* Logout Confirmation Dialog */}
+      <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Czy na pewno chcesz wyjść?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Zostaniesz wylogowany i wrócisz do ekranu startowego.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Anuluj</AlertDialogCancel>
+            <AlertDialogAction onClick={handleLogout}>Wyjdź</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <div className="max-w-4xl mx-auto space-y-6">
         {/* Search Bar */}
@@ -459,7 +540,7 @@ const Player = () => {
                   }
                 }}
                 className="rounded-full w-20 h-20"
-                style={{ background: "linear-gradient(135deg, hsl(260 80% 60%), hsl(180 80% 60%))" }}
+                style={{ background: COLOR_THEMES[selectedTheme].gradient }}
                 disabled={!currentVideo}
               >
                 {isPlaying ? <Pause className="h-8 w-8" /> : <Play className="h-8 w-8 ml-1" />}
