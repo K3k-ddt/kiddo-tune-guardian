@@ -4,12 +4,24 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 import { Search, Heart, History, LogOut, Play, Pause, SkipBack, SkipForward, Loader2, Clock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import VoiceSearch from "@/components/VoiceSearch";
 import YouTubePlayer, { YouTubePlayerHandle } from "@/components/YouTubePlayer";
 import { App as CapacitorApp } from '@capacitor/app';
+
+const SEARCH_SUGGESTIONS = [
+  "piosenki dla dzieci",
+  "bajki po polsku",
+  "edukacyjne piosenki",
+  "kołysanki dla dzieci",
+  "angielski dla dzieci",
+  "muzyka relaksacyjna",
+  "przygody",
+  "nauka liczenia"
+];
 
 const Player = () => {
   const navigate = useNavigate();
@@ -320,6 +332,27 @@ const Player = () => {
       <div className="max-w-4xl mx-auto space-y-6">
         {/* Search Bar */}
         <div className="bg-white rounded-3xl p-6 shadow-xl">
+          {/* Search Suggestions */}
+          <ScrollArea className="w-full whitespace-nowrap mb-4">
+            <div className="flex gap-2">
+              {SEARCH_SUGGESTIONS.map((suggestion) => (
+                <Button
+                  key={suggestion}
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setSearchQuery(suggestion);
+                    handleSearch(suggestion);
+                  }}
+                  className="rounded-full shrink-0"
+                >
+                  {suggestion}
+                </Button>
+              ))}
+            </div>
+            <ScrollBar orientation="horizontal" />
+          </ScrollArea>
+
           <div className="flex gap-3 mb-4">
             <Input
               value={searchQuery}

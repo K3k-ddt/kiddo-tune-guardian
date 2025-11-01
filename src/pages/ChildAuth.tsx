@@ -55,12 +55,12 @@ const ChildAuth = () => {
   };
 
   const handleCodeSubmit = () => {
-    if (codeInput.trim().length === 6) {
+    if (codeInput.trim().length === 8) {
       setNeedsCode(false);
       setLoading(true);
-      loadChildren(codeInput.trim().toUpperCase());
+      loadChildren(codeInput.trim());
     } else {
-      toast.error('Kod musi mieć 6 znaków');
+      toast.error('Kod musi mieć 8 znaków');
     }
   };
 
@@ -150,16 +150,16 @@ const ChildAuth = () => {
             <CardContent className="space-y-4">
               <Input
                 value={codeInput}
-                onChange={(e) => setCodeInput(e.target.value.toUpperCase())}
+                onChange={(e) => setCodeInput(e.target.value.toLowerCase())}
                 onKeyPress={(e) => e.key === "Enter" && handleCodeSubmit()}
-                placeholder="XXXXXX"
-                maxLength={6}
+                placeholder="xxxxxxxx"
+                maxLength={8}
                 className="h-16 text-2xl text-center font-mono tracking-widest"
               />
               <Button
                 onClick={handleCodeSubmit}
                 className="w-full h-14 text-lg"
-                disabled={codeInput.length !== 6}
+                disabled={codeInput.length !== 8}
               >
                 Dalej
               </Button>
