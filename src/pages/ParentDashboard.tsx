@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { LogOut, UserPlus, Clock, Shield, History as HistoryIcon, Copy, Check, QrCode } from "lucide-react";
+import { LogOut, UserPlus, Clock, Shield, History as HistoryIcon, Copy, Check, QrCode, ArrowLeft } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import HistoryList from "@/components/HistoryList";
 import BlockedContent from "@/components/BlockedContent";
@@ -152,7 +152,13 @@ const ParentDashboard = () => {
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-white">Panel Rodzica</h1>
+          <div className="flex items-center gap-3">
+            <Button onClick={() => navigate("/")} variant="ghost" className="text-white hover:bg-white/20">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Strona główna
+            </Button>
+            <h1 className="text-3xl font-bold text-white">Panel Rodzica</h1>
+          </div>
           <Button onClick={handleLogout} variant="secondary">
             <LogOut className="mr-2 h-4 w-4" />
             Wyloguj

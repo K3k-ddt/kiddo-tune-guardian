@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { Music2, ArrowLeft } from "lucide-react";
 
@@ -13,28 +14,34 @@ const ChildAuth = () => {
   const [selectedChild, setSelectedChild] = useState<any>(null);
   const [pin, setPin] = useState("");
   const [loading, setLoading] = useState(true);
+  const [needsCode, setNeedsCode] = useState(false);
+  const [codeInput, setCodeInput] = useState("");
 
   useEffect(() => {
     loadChildren();
   }, [parentCode]);
 
-  const loadChildren = async () => {
+  const loadChildren = async (code?: string) => {
     setLoading(true);
     try {
       let data, error;
-      if (parentCode) {
+      const codeToUse = code || parentCode;
+      
+      if (codeToUse) {
         // Load children for specific parent code (no auth required)
         ({ data, error } = await supabase.rpc('get_children_for_code', {
-          parent_code_input: parentCode
+          parent_code_input: codeToUse
         }));
       } else {
-        // Load only authenticated parent's children
+        // Check if parent is logged in
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) {
-          toast.error('Musisz się zalogować jako rodzic');
-          navigate('/parent-auth');
+          // No parent code and no logged in parent - show code input
+          setNeedsCode(true);
+          setLoading(false);
           return;
         }
+        // Load only authenticated parent's children
         ({ data, error } = await supabase.rpc('get_children_for_login'));
       }
       if (error) throw error;
@@ -44,6 +51,16 @@ const ChildAuth = () => {
       toast.error('Błąd podczas ładowania kont dzieci');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleCodeSubmit = () => {
+    if (codeInput.trim().length === 6) {
+      setNeedsCode(false);
+      setLoading(true);
+      loadChildren(codeInput.trim().toUpperCase());
+    } else {
+      toast.error('Kod musi mieć 6 znaków');
     }
   };
 
@@ -98,6 +115,65 @@ const ChildAuth = () => {
         background: "linear-gradient(135deg, hsl(260 80% 60%), hsl(180 80% 60%))"
       }}>
         <div className="text-white text-2xl">Ładowanie...</div>
+      </div>
+    );
+  }
+
+  if (needsCode) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4" style={{
+        background: "linear-gradient(135deg, hsl(260 80% 60%), hsl(180 80% 60%))"
+      }}>
+        <div className="w-full max-w-md">
+          <Button
+            onClick={() => navigate("/")}
+            variant="ghost"
+            className="mb-4 text-white hover:bg-white/20"
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Wróć
+          </Button>
+          <Card>
+            <CardHeader className="text-center">
+              <div className="flex justify-center mb-4">
+                <div className="w-20 h-20 rounded-full flex items-center justify-center" style={{
+                  background: "linear-gradient(135deg, hsl(260 100% 75%), hsl(30 100% 80%))"
+                }}>
+                  <Music2 className="w-10 h-10 text-white" />
+                </div>
+              </div>
+              <CardTitle className="text-3xl">Wpisz kod rodzica</CardTitle>
+              <CardDescription className="text-lg">
+                Poproś rodzica o kod dostępu
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Input
+                value={codeInput}
+                onChange={(e) => setCodeInput(e.target.value.toUpperCase())}
+                onKeyPress={(e) => e.key === "Enter" && handleCodeSubmit()}
+                placeholder="XXXXXX"
+                maxLength={6}
+                className="h-16 text-2xl text-center font-mono tracking-widest"
+              />
+              <Button
+                onClick={handleCodeSubmit}
+                className="w-full h-14 text-lg"
+                disabled={codeInput.length !== 6}
+              >
+                Dalej
+              </Button>
+              <div className="text-center text-sm text-muted-foreground">lub</div>
+              <Button
+                onClick={() => navigate("/parent-auth")}
+                variant="outline"
+                className="w-full"
+              >
+                Zaloguj się jako rodzic
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     );
   }
