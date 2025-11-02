@@ -139,8 +139,8 @@ const ParentDashboard = () => {
   };
 
   const handleSaveCode = async () => {
-    if (!newParentCode.trim() || newParentCode.length < 6) {
-      toast.error("Kod musi mieć minimum 6 znaków");
+    if (!newParentCode.trim() || newParentCode.length !== 8) {
+      toast.error("Kod musi mieć dokładnie 8 znaków");
       return;
     }
 
@@ -159,16 +159,24 @@ const ParentDashboard = () => {
       }
 
       // Update the code
-      const { error } = await supabase
+      const { data: updatedData, error } = await supabase
         .from("parent_accounts")
         .update({ parent_code: newParentCode.toUpperCase() })
-        .eq("id", parentAccount.id);
+        .eq("id", parentAccount.id)
+        .select()
+        .single();
 
       if (error) throw error;
 
-      setParentAccount({ ...parentAccount, parent_code: newParentCode.toUpperCase() });
+      // Update local state with fresh data from database
+      if (updatedData) {
+        setParentAccount(updatedData);
+      }
       setEditingCode(false);
       toast.success("Kod został zmieniony!");
+      
+      // Reload the page data to ensure everything is in sync
+      await checkAuth();
     } catch (error: any) {
       console.error("Error updating code:", error);
       toast.error("Błąd podczas zmiany kodu");
@@ -228,9 +236,9 @@ const ParentDashboard = () => {
                   <Input
                     value={newParentCode}
                     onChange={(e) => setNewParentCode(e.target.value.toUpperCase())}
-                    placeholder="Wpisz nowy kod"
+                    placeholder="8 znaków"
                     className="flex-1 text-2xl font-mono font-bold text-center"
-                    maxLength={12}
+                    maxLength={8}
                   />
                   <Button onClick={handleSaveCode} size="lg" className="h-16">
                     Zapisz
