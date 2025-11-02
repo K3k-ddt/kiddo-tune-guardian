@@ -85,7 +85,7 @@ const Player = () => {
     const playVideoData = localStorage.getItem('playVideo');
     if (playVideoData) {
       const videoData = JSON.parse(playVideoData);
-      handlePlayVideo(videoData);
+      handlePlayVideo(videoData, false);
       localStorage.removeItem('playVideo');
     }
 
@@ -233,8 +233,24 @@ const Player = () => {
     setCurrentTime(0);
     setDuration(0);
 
-    // Check if video is in favorites
-    checkIfFavorite(video.videoId);
+    // Check if video is in favorites - wait for it to complete
+    await checkIfFavorite(video.videoId);
+
+    // If no queue exists (from favorites/history), search for similar content
+    if (!addToQueue && queue.length === 0 && video.title) {
+      try {
+        const { data, error } = await supabase.functions.invoke('youtube-search', {
+          body: { query: video.title, parentId }
+        });
+
+        if (!error && !data.blocked && data.results?.length > 0) {
+          setQueue(data.results);
+          setCurrentIndex(0);
+        }
+      } catch (error) {
+        console.error('Error loading similar content:', error);
+      }
+    }
 
     // Save to playback history
     try {
@@ -412,7 +428,7 @@ const Player = () => {
 
       <div className="max-w-4xl mx-auto space-y-6">
         {/* Search Bar */}
-        <div className="bg-white rounded-3xl p-6 shadow-xl">
+        <div className="rounded-3xl p-6 shadow-xl" style={{ background: "rgba(255, 255, 255, 0.95)" }}>
           {/* Search Suggestions */}
           <ScrollArea className="w-full whitespace-nowrap mb-4">
             <div className="flex gap-2">
@@ -478,7 +494,7 @@ const Player = () => {
         </div>
 
         {/* Player */}
-        <div className="bg-white rounded-3xl p-8 shadow-xl">
+        <div className="rounded-3xl p-8 shadow-xl" style={{ background: "rgba(255, 255, 255, 0.95)" }}>
           <div className="text-center space-y-6">
             {currentVideo ? (
               <>
@@ -575,8 +591,8 @@ const Player = () => {
           <Button 
             onClick={() => navigate("/favorites")}
             size="lg" 
-            className="h-24 rounded-2xl text-lg"
-            style={{ background: "hsl(0 100% 70%)" }}
+            className="h-24 rounded-2xl text-lg text-white"
+            style={{ background: "rgba(255, 255, 255, 0.2)", backdropFilter: "blur(10px)" }}
           >
             <Heart className="mr-2 h-6 w-6" />
             Ulubione
@@ -584,8 +600,8 @@ const Player = () => {
           <Button 
             onClick={() => navigate("/history")}
             size="lg" 
-            className="h-24 rounded-2xl text-lg"
-            style={{ background: "hsl(280 100% 70%)" }}
+            className="h-24 rounded-2xl text-lg text-white"
+            style={{ background: "rgba(255, 255, 255, 0.2)", backdropFilter: "blur(10px)" }}
           >
             <History className="mr-2 h-6 w-6" />
             Historia

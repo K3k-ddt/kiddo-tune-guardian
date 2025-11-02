@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { LogOut, UserPlus, Clock, Shield, History as HistoryIcon, Copy, Check, QrCode, ArrowLeft } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import HistoryList from "@/components/HistoryList";
 import BlockedContent from "@/components/BlockedContent";
@@ -15,6 +16,8 @@ const ParentDashboard = () => {
   const [parentAccount, setParentAccount] = useState<any>(null);
   const [children, setChildren] = useState<any[]>([]);
   const [copiedCode, setCopiedCode] = useState(false);
+  const [editingCode, setEditingCode] = useState(false);
+  const [newParentCode, setNewParentCode] = useState("");
 
   useEffect(() => {
     checkAuth();
@@ -130,6 +133,48 @@ const ParentDashboard = () => {
     }
   };
 
+  const handleEditCode = () => {
+    setNewParentCode(parentAccount?.parent_code || "");
+    setEditingCode(true);
+  };
+
+  const handleSaveCode = async () => {
+    if (!newParentCode.trim() || newParentCode.length < 6) {
+      toast.error("Kod musi mieć minimum 6 znaków");
+      return;
+    }
+
+    try {
+      // Check if code already exists
+      const { data: existing } = await supabase
+        .from("parent_accounts")
+        .select("id")
+        .ilike("parent_code", newParentCode)
+        .neq("id", parentAccount.id)
+        .single();
+
+      if (existing) {
+        toast.error("Ten kod już istnieje. Wybierz inny kod.");
+        return;
+      }
+
+      // Update the code
+      const { error } = await supabase
+        .from("parent_accounts")
+        .update({ parent_code: newParentCode.toUpperCase() })
+        .eq("id", parentAccount.id);
+
+      if (error) throw error;
+
+      setParentAccount({ ...parentAccount, parent_code: newParentCode.toUpperCase() });
+      setEditingCode(false);
+      toast.success("Kod został zmieniony!");
+    } catch (error: any) {
+      console.error("Error updating code:", error);
+      toast.error("Błąd podczas zmiany kodu");
+    }
+  };
+
   const getChildLoginLink = () => {
     if (parentAccount?.parent_code) {
       return `${window.location.origin}/child-login/${parentAccount.parent_code}`;
@@ -178,24 +223,47 @@ const ParentDashboard = () => {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center gap-4">
-              <div className="flex-1 bg-gradient-to-r from-purple-100 to-blue-100 rounded-lg p-6 text-center">
-                <div className="text-4xl font-mono font-bold tracking-widest text-purple-900">
-                  {parentAccount?.parent_code || 'Ładowanie...'}
-                </div>
-              </div>
-              <Button onClick={copyParentCode} variant="outline" size="lg" className="h-16">
-                {copiedCode ? (
-                  <>
-                    <Check className="mr-2 h-5 w-5" />
-                    Skopiowano
-                  </>
-                ) : (
-                  <>
-                    <Copy className="mr-2 h-5 w-5" />
-                    Kopiuj
-                  </>
-                )}
-              </Button>
+              {editingCode ? (
+                <>
+                  <Input
+                    value={newParentCode}
+                    onChange={(e) => setNewParentCode(e.target.value.toUpperCase())}
+                    placeholder="Wpisz nowy kod"
+                    className="flex-1 text-2xl font-mono font-bold text-center"
+                    maxLength={12}
+                  />
+                  <Button onClick={handleSaveCode} size="lg" className="h-16">
+                    Zapisz
+                  </Button>
+                  <Button onClick={() => setEditingCode(false)} variant="outline" size="lg" className="h-16">
+                    Anuluj
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <div className="flex-1 bg-gradient-to-r from-purple-100 to-blue-100 rounded-lg p-6 text-center">
+                    <div className="text-4xl font-mono font-bold tracking-widest text-purple-900">
+                      {parentAccount?.parent_code || 'Ładowanie...'}
+                    </div>
+                  </div>
+                  <Button onClick={handleEditCode} variant="outline" size="lg" className="h-16">
+                    Edytuj
+                  </Button>
+                  <Button onClick={copyParentCode} variant="outline" size="lg" className="h-16">
+                    {copiedCode ? (
+                      <>
+                        <Check className="mr-2 h-5 w-5" />
+                        Skopiowano
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="mr-2 h-5 w-5" />
+                        Kopiuj
+                      </>
+                    )}
+                  </Button>
+                </>
+              )}
             </div>
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
               <p className="text-sm font-medium text-blue-900 mb-2">Link bezpośredni:</p>

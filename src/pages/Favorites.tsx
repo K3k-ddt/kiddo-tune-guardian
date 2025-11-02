@@ -60,9 +60,29 @@ const Favorites = () => {
     return null;
   }
 
+  const savedTheme = currentChild ? localStorage.getItem(`theme_${currentChild.childId}`) : null;
+  const themeIndex = savedTheme ? parseInt(savedTheme) : 0;
+  const themeGradient = [
+    "linear-gradient(135deg, hsl(260 80% 60%), hsl(180 80% 60%))",
+    "linear-gradient(135deg, hsl(340 80% 65%), hsl(30 90% 65%))",
+    "linear-gradient(135deg, hsl(120 70% 55%), hsl(60 90% 60%))",
+    "linear-gradient(135deg, hsl(200 90% 55%), hsl(220 85% 65%))",
+    "linear-gradient(135deg, hsl(0 85% 60%), hsl(320 80% 65%))",
+    "linear-gradient(135deg, hsl(25 95% 60%), hsl(50 95% 60%))",
+    "linear-gradient(135deg, hsl(170 80% 50%), hsl(140 70% 55%))",
+    "linear-gradient(135deg, hsl(280 75% 60%), hsl(320 80% 65%))",
+    "linear-gradient(135deg, hsl(190 90% 55%), hsl(280 80% 60%))",
+    "linear-gradient(135deg, hsl(0 85% 60%), hsl(60 90% 60%), hsl(180 80% 55%))",
+    "linear-gradient(135deg, hsl(260 60% 65%), hsl(280 50% 70%))",
+    "linear-gradient(135deg, hsl(15 90% 65%), hsl(340 85% 65%))",
+    "linear-gradient(135deg, hsl(160 70% 60%), hsl(180 60% 70%))",
+    "linear-gradient(135deg, hsl(45 100% 60%), hsl(30 100% 65%))",
+    "linear-gradient(135deg, hsl(270 70% 55%), hsl(290 65% 60%))",
+  ][themeIndex];
+
   return (
     <div className="min-h-screen p-4" style={{
-      background: "linear-gradient(135deg, hsl(260 80% 60%), hsl(180 80% 60%))"
+      background: themeGradient
     }}>
       <div className="max-w-4xl mx-auto">
         <Button
@@ -74,7 +94,7 @@ const Favorites = () => {
           Powrót do odtwarzacza
         </Button>
 
-        <Card className="p-8">
+        <Card className="p-8" style={{ background: "rgba(255, 255, 255, 0.95)" }}>
           <div className="flex items-center gap-3 mb-6">
             <Heart className="h-8 w-8 text-red-500 fill-red-500" />
             <h1 className="text-3xl font-bold">Twoje ulubione</h1>

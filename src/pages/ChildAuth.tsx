@@ -88,16 +88,15 @@ const ChildAuth = () => {
 
       const result = data as any;
       if (result.success) {
-        // Store only session token in localStorage
-        localStorage.setItem("childSession", JSON.stringify({
+        const sessionData = {
           sessionToken: result.session_token,
           childId: result.child_id,
           username: result.username,
           avatarColor: result.avatar_color,
           parentId: result.parent_id
-        }));
-        toast.success(`Witaj, ${result.username}!`);
-        navigate("/player");
+        };
+        toast.success(`Witaj ${result.username}!`);
+        navigate("/color-theme-selection", { state: { sessionData } });
       } else {
         toast.error(result.error || "Nieprawidłowy PIN!");
         setPin("");
