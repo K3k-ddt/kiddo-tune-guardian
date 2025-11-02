@@ -22,10 +22,10 @@ const Index = () => {
         {/* Title */}
         <div className="space-y-4">
           <h1 className="text-6xl font-bold text-white drop-shadow-lg">
-            Muzyka dla Dzieci
+            VibeOn
           </h1>
           <p className="text-2xl text-white/90">
-            Bezpieczna aplikacja do słuchania muzyki z YouTube
+            Bezpieczna aplikacja muzyczna dla dzieci
           </p>
         </div>
 
