@@ -151,7 +151,7 @@ const ParentDashboard = () => {
         .select("id")
         .ilike("parent_code", newParentCode)
         .neq("id", parentAccount.id)
-        .single();
+        .maybeSingle();
 
       if (existing) {
         toast.error("Ten kod już istnieje. Wybierz inny kod.");
