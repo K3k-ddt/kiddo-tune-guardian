@@ -295,16 +295,18 @@ const Player = () => {
     }
 
     // Save to playback history
-    try {
-      await supabase.rpc('add_playback_history', {
-        session_token: currentChild.sessionToken,
-        video_id_input: video.videoId,
-        video_title_input: video.title,
-        video_thumbnail_input: video.thumbnail,
-        search_query_input: searchQuery
-      });
-    } catch (error) {
-      console.error('Error saving to history:', error);
+    if (currentChild?.sessionToken) {
+      try {
+        await supabase.rpc('add_playback_history', {
+          session_token: currentChild.sessionToken,
+          video_id_input: video.videoId,
+          video_title_input: video.title,
+          video_thumbnail_input: video.thumbnail,
+          search_query_input: searchQuery
+        });
+      } catch (error) {
+        console.error('Error saving to history:', error);
+      }
     }
   };
 

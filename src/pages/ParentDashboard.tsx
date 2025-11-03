@@ -159,19 +159,13 @@ const ParentDashboard = () => {
       }
 
       // Update the code
-      const { data: updatedData, error } = await supabase
+      const { error } = await supabase
         .from("parent_accounts")
         .update({ parent_code: newParentCode.toUpperCase() })
-        .eq("id", parentAccount.id)
-        .select()
-        .single();
+        .eq("id", parentAccount.id);
 
       if (error) throw error;
 
-      // Update local state with fresh data from database
-      if (updatedData) {
-        setParentAccount(updatedData);
-      }
       setEditingCode(false);
       toast.success("Kod został zmieniony!");
       

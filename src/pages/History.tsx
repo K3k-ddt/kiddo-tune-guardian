@@ -104,7 +104,11 @@ const History = () => {
               {history.map((item, index) => (
                 <div
                   key={item.id}
-                  className="flex items-center gap-4 p-4 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors"
+                  className="flex items-center gap-4 p-4 rounded-xl transition-colors"
+                  style={{
+                    background: `${themeColors.primary}10`,
+                    border: `1px solid ${themeColors.primary}20`
+                  }}
                 >
                   <img 
                     src={item.video_thumbnail} 
@@ -136,6 +140,7 @@ const History = () => {
                     }}
                     size="sm"
                     className="rounded-xl"
+                    style={{ background: themeColors.primary }}
                   >
                     <Play className="h-4 w-4" />
                   </Button>
