@@ -2,6 +2,7 @@ import { useEffect, useRef, useImperativeHandle, forwardRef } from "react";
 
 interface YouTubePlayerProps {
   videoId: string;
+  volume?: number;
   onPlay?: () => void;
   onPause?: () => void;
   onEnded?: () => void;
@@ -14,6 +15,7 @@ export interface YouTubePlayerHandle {
   seekTo: (seconds: number) => void;
   getCurrentTime: () => number;
   getDuration: () => number;
+  setVolume: (volume: number) => void;
 }
 
 declare global {
@@ -24,7 +26,7 @@ declare global {
 }
 
 const YouTubePlayer = forwardRef<YouTubePlayerHandle, YouTubePlayerProps>(
-  ({ videoId, onPlay, onPause, onEnded, onTimeUpdate }, ref) => {
+  ({ videoId, volume = 100, onPlay, onPause, onEnded, onTimeUpdate }, ref) => {
     const playerRef = useRef<any>(null);
     const wrapperRef = useRef<HTMLDivElement>(null);
     const playerIdRef = useRef(`youtube-player-${Math.random().toString(36).substr(2, 9)}`);
@@ -64,6 +66,11 @@ const YouTubePlayer = forwardRef<YouTubePlayerHandle, YouTubePlayerProps>(
         }
         return 0;
       },
+      setVolume: (vol: number) => {
+        if (playerRef.current && typeof playerRef.current.setVolume === 'function') {
+          playerRef.current.setVolume(vol);
+        }
+      },
     }));
 
     useEffect(() => {
@@ -101,6 +108,10 @@ const YouTubePlayer = forwardRef<YouTubePlayerHandle, YouTubePlayerProps>(
               events: {
                 onReady: (event: any) => {
                   console.log('YouTube player ready, playing video');
+                  // Set initial volume
+                  if (typeof event.target.setVolume === 'function') {
+                    event.target.setVolume(volume);
+                  }
                   event.target.playVideo();
                   
                   // Start time update interval

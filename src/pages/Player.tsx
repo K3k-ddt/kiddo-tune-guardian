@@ -61,6 +61,8 @@ const Player = () => {
   const [timeUsage, setTimeUsage] = useState({ used: 0, limit: 60, remaining: 60 });
   const [selectedTheme, setSelectedTheme] = useState(0);
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
+  const [volume, setVolume] = useState(100);
+  const [searchSuggestions, setSearchSuggestions] = useState(SEARCH_SUGGESTIONS);
   const timeTrackingRef = useRef<number>(0);
   const loginTimeRef = useRef<number>(Date.now());
 
@@ -74,6 +76,7 @@ const Player = () => {
     setCurrentChild(session);
     loadParentId(session.parentId);
     loadTimeUsage(session.sessionToken);
+    loadSearchSuggestions(session.sessionToken);
     
     // Load saved theme
     const savedTheme = localStorage.getItem(`theme_${session.childId}`);
@@ -81,12 +84,14 @@ const Player = () => {
       setSelectedTheme(parseInt(savedTheme));
     }
 
-    // Check if there's a video to play from history/favorites
+    // Check if there's a video to play from history/favorites (delay to ensure state is ready)
     const playVideoData = localStorage.getItem('playVideo');
     if (playVideoData) {
       const videoData = JSON.parse(playVideoData);
-      handlePlayVideo(videoData, false);
-      localStorage.removeItem('playVideo');
+      setTimeout(() => {
+        handlePlayVideo(videoData, false);
+        localStorage.removeItem('playVideo');
+      }, 100);
     }
 
     // Keep app running in background (for music playback)
@@ -117,6 +122,33 @@ const Player = () => {
 
   const loadParentId = async (childParentId: string) => {
     setParentId(childParentId);
+  };
+
+  const loadSearchSuggestions = async (sessionToken: string) => {
+    try {
+      const { data, error } = await supabase.rpc('get_playback_history', {
+        session_token: sessionToken
+      });
+
+      if (error) throw error;
+
+      if (data && data.length > 0) {
+        // Extract unique search queries from history
+        const queries = data
+          .filter((item: any) => item.search_query)
+          .map((item: any) => item.search_query);
+        
+        // Get unique queries and limit to 8
+        const uniqueQueries = [...new Set(queries)].slice(0, 8);
+        
+        if (uniqueQueries.length > 0) {
+          setSearchSuggestions(uniqueQueries as string[]);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading search suggestions:', error);
+      // Keep default suggestions if loading fails
+    }
   };
 
   const loadTimeUsage = async (sessionToken: string) => {
@@ -187,6 +219,14 @@ const Player = () => {
     }
   };
 
+  const handleVolumeChange = (value: number[]) => {
+    const newVolume = value[0];
+    setVolume(newVolume);
+    if (playerRef.current && typeof (playerRef.current as any).setVolume === 'function') {
+      (playerRef.current as any).setVolume(newVolume);
+    }
+  };
+
   const handleSearch = async (query?: string) => {
     const searchTerm = query || searchQuery;
     if (!searchTerm.trim()) {
@@ -233,8 +273,10 @@ const Player = () => {
     setCurrentTime(0);
     setDuration(0);
 
-    // Check if video is in favorites - wait for it to complete
-    await checkIfFavorite(video.videoId);
+    // Check if video is in favorites immediately
+    if (currentChild?.sessionToken) {
+      await checkIfFavorite(video.videoId);
+    }
 
     // If no queue exists (from favorites/history), search for similar content
     if (!addToQueue && queue.length === 0 && video.title) {
@@ -311,14 +353,21 @@ const Player = () => {
   }, []);
 
   const checkIfFavorite = async (videoId: string) => {
+    if (!currentChild?.sessionToken) {
+      setIsFavorite(false);
+      return;
+    }
+    
     try {
       const { data } = await supabase.rpc('get_favorites', {
         session_token: currentChild.sessionToken
       });
       
-      setIsFavorite(data?.some((f: any) => f.video_id === videoId) || false);
+      const isFav = data?.some((f: any) => f.video_id === videoId) || false;
+      setIsFavorite(isFav);
     } catch (error) {
       console.error('Error checking favorite:', error);
+      setIsFavorite(false);
     }
   };
 
@@ -428,11 +477,15 @@ const Player = () => {
 
       <div className="max-w-4xl mx-auto space-y-6">
         {/* Search Bar */}
-        <div className="rounded-3xl p-6 shadow-xl" style={{ background: "rgba(255, 255, 255, 0.95)" }}>
+        <div className="rounded-3xl p-6 shadow-xl" style={{ 
+          background: `${COLOR_THEMES[selectedTheme].primary}15`,
+          backdropFilter: "blur(10px)",
+          border: `2px solid ${COLOR_THEMES[selectedTheme].primary}30`
+        }}>
           {/* Search Suggestions */}
           <ScrollArea className="w-full whitespace-nowrap mb-4">
             <div className="flex gap-2">
-              {SEARCH_SUGGESTIONS.map((suggestion) => (
+              {searchSuggestions.map((suggestion) => (
                 <Button
                   key={suggestion}
                   variant="outline"
@@ -494,7 +547,11 @@ const Player = () => {
         </div>
 
         {/* Player */}
-        <div className="rounded-3xl p-8 shadow-xl" style={{ background: "rgba(255, 255, 255, 0.95)" }}>
+        <div className="rounded-3xl p-8 shadow-xl" style={{ 
+          background: `${COLOR_THEMES[selectedTheme].primary}15`,
+          backdropFilter: "blur(10px)",
+          border: `2px solid ${COLOR_THEMES[selectedTheme].primary}30`
+        }}>
           <div className="text-center space-y-6">
             {currentVideo ? (
               <>
@@ -529,6 +586,23 @@ const Player = () => {
                 <div className="flex justify-between text-sm text-muted-foreground">
                   <span>{formatTime(currentTime)}</span>
                   <span>{formatTime(duration)}</span>
+                </div>
+              </div>
+            )}
+
+            {/* Volume Control */}
+            {currentVideo && (
+              <div className="space-y-2 px-4">
+                <div className="flex items-center gap-4">
+                  <span className="text-sm font-medium min-w-[60px]">Głośność</span>
+                  <Slider
+                    value={[volume]}
+                    max={100}
+                    step={1}
+                    onValueChange={handleVolumeChange}
+                    className="flex-1"
+                  />
+                  <span className="text-sm text-muted-foreground min-w-[40px]">{volume}%</span>
                 </div>
               </div>
             )}
@@ -614,6 +688,7 @@ const Player = () => {
         <YouTubePlayer
           ref={playerRef}
           videoId={currentVideo.videoId}
+          volume={volume}
           onPlay={() => setIsPlaying(true)}
           onPause={() => setIsPlaying(false)}
           onEnded={() => {
