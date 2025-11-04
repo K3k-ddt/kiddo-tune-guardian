@@ -4,11 +4,20 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { LogOut, UserPlus, Clock, Shield, History as HistoryIcon, Copy, Check, QrCode, ArrowLeft } from "lucide-react";
+import { LogOut, UserPlus, Clock, Shield, History as HistoryIcon, Copy, Check, QrCode, ArrowLeft, Palette } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import HistoryList from "@/components/HistoryList";
 import BlockedContent from "@/components/BlockedContent";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+
+const COLOR_THEMES = [
+  { name: "Profesjonalny niebieski", gradient: "linear-gradient(135deg, hsl(220 80% 50%), hsl(220 60% 40%))", primary: "hsl(220 80% 50%)" },
+  { name: "Granatowy", gradient: "linear-gradient(135deg, hsl(230 70% 45%), hsl(240 60% 35%))", primary: "hsl(230 70% 45%)" },
+  { name: "Szary profesjonalny", gradient: "linear-gradient(135deg, hsl(210 15% 50%), hsl(210 20% 35%))", primary: "hsl(210 15% 50%)" },
+  { name: "Zielony biznesowy", gradient: "linear-gradient(135deg, hsl(150 50% 45%), hsl(160 45% 35%))", primary: "hsl(150 50% 45%)" },
+  { name: "Bordowy", gradient: "linear-gradient(135deg, hsl(0 60% 40%), hsl(10 55% 30%))", primary: "hsl(0 60% 40%)" },
+];
 
 const ParentDashboard = () => {
   const navigate = useNavigate();
@@ -18,6 +27,7 @@ const ParentDashboard = () => {
   const [copiedCode, setCopiedCode] = useState(false);
   const [editingCode, setEditingCode] = useState(false);
   const [newParentCode, setNewParentCode] = useState("");
+  const [selectedTheme, setSelectedTheme] = useState(0);
 
   useEffect(() => {
     checkAuth();
@@ -192,9 +202,11 @@ const ParentDashboard = () => {
     );
   }
 
+  const themeColors = COLOR_THEMES[selectedTheme];
+
   return (
     <div className="min-h-screen p-4" style={{
-      background: "linear-gradient(135deg, hsl(220 80% 50%), hsl(220 60% 40%))"
+      background: themeColors.gradient
     }}>
       <div className="max-w-6xl mx-auto">
         {/* Header */}
@@ -206,10 +218,39 @@ const ParentDashboard = () => {
             </Button>
             <h1 className="text-3xl font-bold text-white">Panel Rodzica</h1>
           </div>
-          <Button onClick={handleLogout} variant="secondary">
-            <LogOut className="mr-2 h-4 w-4" />
-            Wyloguj
-          </Button>
+          <div className="flex items-center gap-3">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="ghost" className="text-white hover:bg-white/20">
+                  <Palette className="mr-2 h-5 w-5" />
+                  Motyw
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-80">
+                <div className="space-y-3">
+                  <h4 className="font-semibold text-sm">Wybierz motyw kolorystyczny</h4>
+                  <div className="grid grid-cols-5 gap-2">
+                    {COLOR_THEMES.map((theme, index) => (
+                      <button
+                        key={index}
+                        onClick={() => setSelectedTheme(index)}
+                        className={`w-full aspect-square rounded-lg transition-all hover:scale-105 ${
+                          selectedTheme === index ? 'ring-2 ring-primary scale-110' : ''
+                        }`}
+                        style={{ background: theme.gradient }}
+                        title={theme.name}
+                      />
+                    ))}
+                  </div>
+                  <p className="text-xs text-muted-foreground text-center">{themeColors.name}</p>
+                </div>
+              </PopoverContent>
+            </Popover>
+            <Button onClick={handleLogout} variant="secondary">
+              <LogOut className="mr-2 h-4 w-4" />
+              Wyloguj
+            </Button>
+          </div>
         </div>
 
         {/* Parent Code Card */}

@@ -467,12 +467,12 @@ const Player = () => {
           <AlertDialogHeader>
             <AlertDialogTitle>Czy na pewno chcesz wyjść?</AlertDialogTitle>
             <AlertDialogDescription>
-              Zostaniesz wylogowany i wrócisz do ekranu startowego.
+              Jeśli wyjdziesz, będziesz musiał się zalogować ponownie.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Anuluj</AlertDialogCancel>
-            <AlertDialogAction onClick={handleLogout}>Wyjdź</AlertDialogAction>
+            <AlertDialogCancel>Nie, zostań</AlertDialogCancel>
+            <AlertDialogAction onClick={handleLogout}>Tak, wyjdź</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -592,20 +592,33 @@ const Player = () => {
               </div>
             )}
 
-            {/* Volume Control */}
+            {/* Volume Control - Vertical Slider */}
             {currentVideo && (
-              <div className="space-y-2 px-4">
-                <div className="flex items-center gap-4">
-                  <span className="text-sm font-medium min-w-[60px]">Głośność</span>
-                  <Slider
-                    value={[volume]}
-                    max={100}
-                    step={1}
-                    onValueChange={handleVolumeChange}
-                    className="flex-1"
-                  />
-                  <span className="text-sm text-muted-foreground min-w-[40px]">{volume}%</span>
-                </div>
+              <div className="flex justify-center">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="ghost" size="sm" className="rounded-full">
+                      <span className="text-xs">🔊 {volume}%</span>
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-16 h-48 p-2 flex flex-col items-center justify-center" side="top">
+                    <div className="h-full flex items-center">
+                      <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        value={volume}
+                        onChange={(e) => handleVolumeChange([parseInt(e.target.value)])}
+                        className="h-32 w-8 appearance-none bg-transparent cursor-pointer"
+                        style={{
+                          WebkitAppearance: 'slider-vertical' as any,
+                          width: '8px',
+                          height: '128px'
+                        }}
+                      />
+                    </div>
+                  </PopoverContent>
+                </Popover>
               </div>
             )}
 
@@ -704,6 +717,22 @@ const Player = () => {
           onTimeUpdate={handleTimeUpdate}
         />
       )}
+
+      {/* Logout Confirmation Dialog */}
+      <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Czy na pewno chcesz wyjść?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Jeśli wyjdziesz, będziesz musiał się zalogować ponownie.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Nie, zostań</AlertDialogCancel>
+            <AlertDialogAction onClick={handleLogout}>Tak, wyjdź</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
