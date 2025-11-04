@@ -92,6 +92,15 @@ const Player = () => {
         handlePlayVideo(videoData, false);
         localStorage.removeItem('playVideo');
       }, 100);
+    } else {
+      // Restore previously playing video
+      const savedVideo = localStorage.getItem(`currentVideo_${session.childId}`);
+      if (savedVideo) {
+        const videoData = JSON.parse(savedVideo);
+        setTimeout(() => {
+          handlePlayVideo(videoData, false);
+        }, 100);
+      }
     }
 
     // Keep app running in background (for music playback)
@@ -272,6 +281,11 @@ const Player = () => {
     setIsPlaying(true);
     setCurrentTime(0);
     setDuration(0);
+
+    // Save current video to localStorage for persistence
+    if (currentChild?.childId) {
+      localStorage.setItem(`currentVideo_${currentChild.childId}`, JSON.stringify(video));
+    }
 
     // Check if video is in favorites immediately
     if (currentChild?.sessionToken) {

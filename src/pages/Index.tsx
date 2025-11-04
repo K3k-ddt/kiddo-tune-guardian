@@ -139,7 +139,7 @@ const Index = () => {
         {/* Title */}
         <div className="space-y-4">
           <h1 className={`text-6xl font-bold drop-shadow-lg ${theme.textColor}`}>
-            VibeOn
+            VibeOn™
           </h1>
           <p className={`text-2xl ${theme.textColor} opacity-90`}>
             Bezpieczna aplikacja muzyczna dla dzieci
@@ -191,6 +191,31 @@ const Index = () => {
             <p className="text-sm opacity-90">Osobne profile dla każdego dziecka</p>
           </div>
         </div>
+
+        {/* Footer Links */}
+        <div className={`flex flex-wrap justify-center gap-6 pt-8 text-sm ${theme.textColor} opacity-80`}>
+          <button 
+            onClick={() => navigate("/terms-of-service")}
+            className="hover:opacity-100 underline"
+          >
+            Regulamin
+          </button>
+          <button 
+            onClick={() => navigate("/privacy-policy")}
+            className="hover:opacity-100 underline"
+          >
+            Polityka Prywatności
+          </button>
+          <button 
+            onClick={() => navigate("/contact")}
+            className="hover:opacity-100 underline"
+          >
+            Kontakt
+          </button>
+        </div>
+        <p className={`text-xs ${theme.textColor} opacity-60 pt-2`}>
+          © 2025 Vibe. Wszelkie prawa zastrzeżone.
+        </p>
       </div>
     </div>
   );

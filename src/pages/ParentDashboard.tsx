@@ -149,8 +149,8 @@ const ParentDashboard = () => {
   };
 
   const handleSaveCode = async () => {
-    if (!newParentCode.trim() || newParentCode.length !== 8) {
-      toast.error("Kod musi mieć dokładnie 8 znaków");
+    if (!newParentCode.trim() || newParentCode.length < 3) {
+      toast.error("Kod musi mieć co najmniej 3 znaki");
       return;
     }
 
@@ -270,10 +270,10 @@ const ParentDashboard = () => {
                 <>
                   <Input
                     value={newParentCode}
-                    onChange={(e) => setNewParentCode(e.target.value.toUpperCase())}
-                    placeholder="8 znaków"
+                    onChange={(e) => setNewParentCode(e.target.value)}
+                    placeholder="Np. ImięRodzica"
                     className="flex-1 text-2xl font-mono font-bold text-center"
-                    maxLength={8}
+                    maxLength={20}
                   />
                   <Button onClick={handleSaveCode} size="lg" className="h-16">
                     Zapisz
