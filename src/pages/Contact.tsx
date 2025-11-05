@@ -35,15 +35,21 @@ const Contact = () => {
       
       setLoading(true);
 
-      // Create mailto link with encoded parameters
-      const mailtoLink = `mailto:malinkafh@gmail.com?subject=${encodeURIComponent(validatedData.subject)}&body=${encodeURIComponent(
-        `Imię: ${validatedData.name}\nE-mail: ${validatedData.email}\n\nWiadomość:\n${validatedData.message}`
-      )}`;
+      // Send email via edge function
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-contact-email`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`
+        },
+        body: JSON.stringify(validatedData)
+      });
 
-      // Open default email client
-      window.location.href = mailtoLink;
+      if (!response.ok) {
+        throw new Error('Nie udało się wysłać wiadomości');
+      }
 
-      toast.success("Otwarto klienta poczty email");
+      toast.success("Wiadomość została wysłana!");
       
       // Reset form
       setFormData({

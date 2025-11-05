@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Music2, Shield, Users, Palette } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import logo from "@/assets/logo.jpg";
 
 const WELCOME_THEMES = [
   { 
@@ -129,11 +130,11 @@ const Index = () => {
       <div className="max-w-2xl w-full text-center space-y-12">
         {/* Logo */}
         <div className="flex justify-center">
-          <div className="w-32 h-32 rounded-full flex items-center justify-center shadow-2xl" style={{
-            background: theme.logoGradient
-          }}>
-            <Music2 className="w-16 h-16 text-white" />
-          </div>
+          <img 
+            src={logo} 
+            alt="VibeOn™ Logo" 
+            className="h-32 w-32 object-contain drop-shadow-2xl animate-bounce"
+          />
         </div>
 
         {/* Title */}
