@@ -136,6 +136,26 @@ const YouTubePlayer = forwardRef<YouTubePlayerHandle, YouTubePlayerProps>(
                 },
                 onError: (event: any) => {
                   console.error('YouTube player error:', event.data);
+                  
+                  // Notify parent component about the error
+                  const errorMessages: { [key: number]: string } = {
+                    2: 'Nieprawidłowy ID filmu. Utwór nie istnieje.',
+                    5: 'Błąd odtwarzacza. Spróbuj ponownie.',
+                    100: 'Film nie został znaleziony lub został usunięty.',
+                    101: 'Właściciel filmu nie zezwala na odtwarzanie.',
+                    150: 'Właściciel filmu nie zezwala na odtwarzanie.'
+                  };
+                  
+                  const message = errorMessages[event.data] || 'Nie można odtworzyć filmu.';
+                  
+                  // Dispatch custom event to notify the Player component
+                  const errorEvent = new CustomEvent('youtube-player-error', { 
+                    detail: { 
+                      error: event.data, 
+                      message 
+                    } 
+                  });
+                  window.dispatchEvent(errorEvent);
                 }
               },
             });

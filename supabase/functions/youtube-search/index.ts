@@ -151,7 +151,26 @@ serve(async (req) => {
       
       if (!response.ok) {
         const errorData = await response.text();
-        console.error('YouTube API error:', errorData);
+        console.error('YouTube API error:', response.status, errorData);
+        
+        // Handle specific YouTube API errors
+        if (response.status === 403) {
+          return new Response(
+            JSON.stringify({ 
+              error: 'Przekroczono limit API YouTube. Spróbuj ponownie później.',
+              quotaExceeded: true 
+            }),
+            { status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+        
+        if (response.status === 400) {
+          return new Response(
+            JSON.stringify({ error: 'Nieprawidłowe zapytanie. Spróbuj innego wyszukiwania.' }),
+            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+        
         throw new Error('Failed to search YouTube');
       }
 
@@ -186,6 +205,24 @@ serve(async (req) => {
     searchUrl.searchParams.append('key', YOUTUBE_API_KEY);
 
     const response = await fetch(searchUrl.toString());
+    
+    if (!response.ok) {
+      const errorData = await response.text();
+      console.error('YouTube API error (fallback):', response.status, errorData);
+      
+      if (response.status === 403) {
+        return new Response(
+          JSON.stringify({ 
+            error: 'Przekroczono limit API YouTube. Spróbuj ponownie później.',
+            quotaExceeded: true 
+          }),
+          { status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      
+      throw new Error('Failed to search YouTube');
+    }
+    
     const data = await response.json();
 
     const results = data.items?.map((item: any) => ({

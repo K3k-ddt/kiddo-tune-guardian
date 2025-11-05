@@ -84,6 +84,16 @@ const Player = () => {
       setSelectedTheme(parseInt(savedTheme));
     }
 
+    // Listen for YouTube player errors
+    const handleYouTubeError = (event: any) => {
+      const { message } = event.detail;
+      toast.error(message);
+      setIsPlaying(false);
+      setCurrentVideo(null);
+    };
+    
+    window.addEventListener('youtube-player-error', handleYouTubeError);
+
     // Check if there's a video to play from history/favorites (delay to ensure state is ready)
     const playVideoData = localStorage.getItem('playVideo');
     if (playVideoData) {
@@ -249,22 +259,50 @@ const Player = () => {
         body: { query: searchTerm, parentId }
       });
 
-      if (error) throw error;
+      // Check for network errors
+      if (error) {
+        if (error.message?.includes('fetch') || error.message?.includes('network')) {
+          toast.error("Brak połączenia z internetem. Sprawdź swoje połączenie.");
+          setSearchResults([]);
+          setIsSearching(false);
+          return;
+        }
+        throw error;
+      }
 
-      if (data.blocked) {
-        toast.error(data.message);
+      // Check for quota exceeded
+      if (data?.quotaExceeded) {
+        toast.error(data.error || "Limit API YouTube został przekroczony. Spróbuj później.");
         setSearchResults([]);
+        setIsSearching(false);
         return;
       }
 
-      setSearchResults(data.results || []);
+      // Check for blocked content
+      if (data?.blocked) {
+        toast.error(data.message);
+        setSearchResults([]);
+        setIsSearching(false);
+        return;
+      }
+
+      setSearchResults(data?.results || []);
       
-      if (data.results?.length === 0) {
-        toast.info("Nie znaleziono wyników");
+      if (!data?.results || data.results.length === 0) {
+        toast.info("Nie znaleziono wyników. Spróbuj innego zapytania.");
       }
     } catch (error: any) {
       console.error('Search error:', error);
-      toast.error("Błąd podczas wyszukiwania");
+      
+      // Handle specific error types
+      if (error.message?.includes('fetch') || error.message?.includes('network')) {
+        toast.error("Brak połączenia z internetem. Sprawdź swoje połączenie.");
+      } else if (error.message?.includes('timeout')) {
+        toast.error("Przekroczono czas oczekiwania. Spróbuj ponownie.");
+      } else {
+        toast.error("Błąd podczas wyszukiwania. Spróbuj ponownie.");
+      }
+      setSearchResults([]);
     } finally {
       setIsSearching(false);
     }
