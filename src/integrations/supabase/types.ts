@@ -331,6 +331,15 @@ export type Database = {
         Returns: Json
       }
       delete_child_account: { Args: { child_id_input: string }; Returns: Json }
+      get_all_children_simple: {
+        Args: never
+        Returns: {
+          avatar_color: string
+          id: string
+          parent_id: string
+          username: string
+        }[]
+      }
       get_children_for_code: {
         Args: { parent_code_input: string }
         Returns: {
@@ -392,6 +401,10 @@ export type Database = {
       verify_child_pin: {
         Args: { child_id_input: string; pin_input: string }
         Returns: Json
+      }
+      verify_child_pin_simple: {
+        Args: { child_id_input: string; pin_input: string }
+        Returns: boolean
       }
     }
     Enums: {

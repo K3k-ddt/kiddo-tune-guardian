@@ -5,8 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import ParentAuth from "./pages/ParentAuth";
-import ChildAuth from "./pages/ChildAuth";
-import ColorThemeSelection from "./pages/ColorThemeSelection";
+import SimpleChildAuth from "./pages/SimpleChildAuth";
 import Player from "./pages/Player";
 import ParentDashboard from "./pages/ParentDashboard";
 import AddChild from "./pages/AddChild";
@@ -29,9 +28,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/parent-auth" element={<ParentAuth />} />
-          <Route path="/child-login" element={<ChildAuth />} />
-          <Route path="/child-login/:parentCode" element={<ChildAuth />} />
-          <Route path="/color-theme-selection" element={<ColorThemeSelection />} />
+          <Route path="/child-login" element={<SimpleChildAuth />} />
           <Route path="/player" element={<Player />} />
           <Route path="/favorites" element={<Favorites />} />
           <Route path="/history" element={<History />} />
