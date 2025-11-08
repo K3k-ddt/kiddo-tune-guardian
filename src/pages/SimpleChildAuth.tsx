@@ -66,29 +66,31 @@ const SimpleChildAuth = () => {
 
   const verifyPin = async (pinToVerify: string) => {
     try {
-      const { data, error } = await supabase.rpc('verify_child_pin_simple', {
+      // Use the full verify_child_pin function that creates a real session
+      const { data, error } = await supabase.rpc('verify_child_pin', {
         child_id_input: selectedChild.id,
         pin_input: pinToVerify
       });
 
       if (error) throw error;
 
-      if (data) {
+      const result = data as any;
+      if (result.success) {
         const sessionData = {
-          childId: selectedChild.id,
-          username: selectedChild.username,
-          avatarColor: selectedChild.avatar_color,
-          parentId: selectedChild.parent_id,
-          sessionToken: `session_${selectedChild.id}_${Date.now()}`,
+          childId: result.child_id,
+          username: result.username,
+          avatarColor: result.avatar_color,
+          parentId: result.parent_id,
+          sessionToken: result.session_token,
           loginTime: new Date().toISOString()
         };
 
         // Save theme
-        localStorage.setItem(`theme_${selectedChild.id}`, selectedTheme.toString());
+        localStorage.setItem(`theme_${result.child_id}`, selectedTheme.toString());
         localStorage.setItem("childSession", JSON.stringify(sessionData));
         navigate("/player");
       } else {
-        toast.error("Nieprawidłowy PIN!");
+        toast.error(result.error || "Nieprawidłowy PIN!");
         setPin("");
       }
     } catch (error) {

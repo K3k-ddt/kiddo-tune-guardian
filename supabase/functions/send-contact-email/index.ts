@@ -24,10 +24,10 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     const { name, email, subject, message }: ContactEmailRequest = await req.json();
 
-    // Send email to company
+    // Send email to company - using the verified sender email
     const emailResponse = await resend.emails.send({
       from: "VibeOn™ Kontakt <onboarding@resend.dev>",
-      to: ["malinkafh@gmail.com"],
+      to: ["amfhmalinka@gmail.com"], // Changed to verified email address
       replyTo: email,
       subject: `VibeOn™: ${subject}`,
       html: `
