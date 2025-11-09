@@ -9,7 +9,7 @@ All colors MUST be HSL.
 @layer base {
   :root {
     /* Kids Mode - Vibrant and Playful - Inspired by VibeOn Logo */
-    --background: 245 90% 97%;
+    --background: 250 25% 92%;
     --foreground: 270 60% 25%;
 
     --card: 0 0% 100%;
