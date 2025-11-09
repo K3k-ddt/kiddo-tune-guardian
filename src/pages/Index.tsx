@@ -3,16 +3,16 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Music2, Shield, Users, Palette } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import logo from "@/assets/logo.jpg";
+import logo from "@/assets/vibeon-logo.png";
 
 const WELCOME_THEMES = [
   { 
-    name: "Fioletowo-błękitny", 
-    gradient: "linear-gradient(135deg, hsl(260 80% 60%), hsl(180 80% 60%))",
+    name: "VibeOn Classic", 
+    gradient: "linear-gradient(135deg, hsl(270 75% 50%), hsl(330 85% 60%))",
     textColor: "text-white",
-    logoGradient: "linear-gradient(135deg, hsl(260 100% 75%), hsl(30 100% 80%))",
+    logoGradient: "linear-gradient(135deg, hsl(270 85% 65%), hsl(20 100% 60%))",
     buttonBg: "white",
-    buttonText: "hsl(260 80% 60%)"
+    buttonText: "hsl(270 75% 50%)"
   },
   { 
     name: "Koralowy zachód", 
@@ -133,7 +133,7 @@ const Index = () => {
           <img 
             src={logo} 
             alt="VibeOn™ Logo" 
-            className="h-32 w-32 object-contain drop-shadow-2xl animate-bounce"
+            className="h-48 w-auto object-contain drop-shadow-2xl animate-bounce"
           />
         </div>
 
