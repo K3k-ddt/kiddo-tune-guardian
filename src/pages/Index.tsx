@@ -8,67 +8,67 @@ import logo from "@/assets/vibeon-logo.png";
 const WELCOME_THEMES = [
   { 
     name: "VibeOn Classic", 
-    gradient: "linear-gradient(135deg, hsl(270 75% 50%), hsl(330 85% 60%))",
-    textColor: "text-white",
+    gradient: "hsl(250 25% 92%)",
+    textColor: "text-gray-800",
     logoGradient: "linear-gradient(135deg, hsl(270 85% 65%), hsl(20 100% 60%))",
-    buttonBg: "white",
-    buttonText: "hsl(270 75% 50%)"
+    buttonBg: "hsl(270 75% 50%)",
+    buttonText: "white"
   },
   { 
     name: "Koralowy zachód", 
-    gradient: "linear-gradient(135deg, hsl(340 85% 65%), hsl(25 90% 65%))",
-    textColor: "text-white",
+    gradient: "hsl(350 30% 90%)",
+    textColor: "text-gray-800",
     logoGradient: "linear-gradient(135deg, hsl(340 100% 75%), hsl(25 100% 75%))",
-    buttonBg: "white",
-    buttonText: "hsl(340 85% 65%)"
+    buttonBg: "hsl(340 85% 65%)",
+    buttonText: "white"
   },
   { 
     name: "Niebieski ocean", 
-    gradient: "linear-gradient(135deg, hsl(200 90% 55%), hsl(220 85% 65%))",
-    textColor: "text-white",
+    gradient: "hsl(210 30% 90%)",
+    textColor: "text-gray-800",
     logoGradient: "linear-gradient(135deg, hsl(200 100% 70%), hsl(220 100% 75%))",
-    buttonBg: "white",
-    buttonText: "hsl(200 90% 55%)"
+    buttonBg: "hsl(200 90% 55%)",
+    buttonText: "white"
   },
   { 
     name: "Zielona świeżość", 
-    gradient: "linear-gradient(135deg, hsl(160 70% 55%), hsl(140 75% 60%))",
-    textColor: "text-white",
+    gradient: "hsl(150 25% 90%)",
+    textColor: "text-gray-800",
     logoGradient: "linear-gradient(135deg, hsl(160 85% 70%), hsl(140 90% 70%))",
-    buttonBg: "white",
-    buttonText: "hsl(160 70% 55%)"
+    buttonBg: "hsl(160 70% 55%)",
+    buttonText: "white"
   },
   { 
     name: "Fioletowy sen", 
-    gradient: "linear-gradient(135deg, hsl(280 75% 60%), hsl(320 80% 65%))",
-    textColor: "text-white",
-    logoGradient: "linear-gradient(135deg, hsl(280 90% 75%), hsl(320 95% 75%))",
-    buttonBg: "white",
-    buttonText: "hsl(280 75% 60%)"
-  },
-  { 
-    name: "Słoneczny dzień", 
-    gradient: "linear-gradient(135deg, hsl(45 95% 60%), hsl(30 95% 65%))",
+    gradient: "hsl(290 30% 90%)",
     textColor: "text-gray-800",
-    logoGradient: "linear-gradient(135deg, hsl(45 100% 70%), hsl(30 100% 70%))",
+    logoGradient: "linear-gradient(135deg, hsl(280 90% 75%), hsl(320 95% 75%))",
     buttonBg: "hsl(280 75% 60%)",
     buttonText: "white"
   },
   { 
+    name: "Słoneczny dzień", 
+    gradient: "hsl(40 35% 90%)",
+    textColor: "text-gray-800",
+    logoGradient: "linear-gradient(135deg, hsl(45 100% 70%), hsl(30 100% 70%))",
+    buttonBg: "hsl(45 85% 55%)",
+    buttonText: "white"
+  },
+  { 
     name: "Różowy cukierek", 
-    gradient: "linear-gradient(135deg, hsl(320 85% 70%), hsl(340 90% 75%))",
-    textColor: "text-white",
+    gradient: "hsl(330 35% 90%)",
+    textColor: "text-gray-800",
     logoGradient: "linear-gradient(135deg, hsl(320 100% 80%), hsl(340 100% 85%))",
-    buttonBg: "white",
-    buttonText: "hsl(320 85% 70%)"
+    buttonBg: "hsl(320 85% 70%)",
+    buttonText: "white"
   },
   { 
     name: "Turkusowa fala", 
-    gradient: "linear-gradient(135deg, hsl(170 80% 50%), hsl(190 85% 60%))",
-    textColor: "text-white",
+    gradient: "hsl(180 25% 90%)",
+    textColor: "text-gray-800",
     logoGradient: "linear-gradient(135deg, hsl(170 95% 65%), hsl(190 100% 70%))",
-    buttonBg: "white",
-    buttonText: "hsl(170 80% 50%)"
+    buttonBg: "hsl(170 80% 50%)",
+    buttonText: "white"
   },
 ];
 
@@ -129,22 +129,12 @@ const Index = () => {
 
       <div className="max-w-2xl w-full text-center space-y-12">
         {/* Logo */}
-        <div className="flex justify-center">
+        <div className="flex justify-center mb-8">
           <img 
             src={logo} 
             alt="VibeOn™ Logo" 
-            className="h-48 w-auto object-contain drop-shadow-2xl animate-bounce"
+            className="h-80 w-auto object-contain drop-shadow-2xl"
           />
-        </div>
-
-        {/* Title */}
-        <div className="space-y-4">
-          <h1 className={`text-6xl font-bold drop-shadow-lg ${theme.textColor}`}>
-            VibeOn™
-          </h1>
-          <p className={`text-2xl ${theme.textColor} opacity-90`}>
-            Bezpieczna aplikacja muzyczna dla dzieci
-          </p>
         </div>
 
         {/* Buttons */}
@@ -166,8 +156,8 @@ const Index = () => {
           <Button
             onClick={() => navigate("/parent-auth")}
             size="lg"
-            variant="ghost"
-            className={`w-full max-w-md h-16 text-xl font-bold rounded-3xl border border-white/30 bg-white/10 ${theme.textColor} hover:bg-white/20`}
+            variant="outline"
+            className={`w-full max-w-md h-16 text-xl font-bold rounded-3xl border-2 ${theme.textColor} hover:bg-black/5`}
           >
             <Shield className="mr-2 h-6 w-6" />
             Panel Rodzica
@@ -176,20 +166,20 @@ const Index = () => {
 
         {/* Features */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-8">
-          <div className={`bg-white/20 backdrop-blur-sm rounded-2xl p-6 ${theme.textColor}`}>
+          <div className={`bg-white/40 backdrop-blur-sm rounded-2xl p-6 ${theme.textColor} shadow-lg`}>
             <Music2 className="w-12 h-12 mx-auto mb-3" />
             <h3 className="font-bold text-lg mb-2">Tylko muzyka</h3>
-            <p className="text-sm opacity-90">Odtwarzanie bez wideo</p>
+            <p className="text-sm opacity-75">Odtwarzanie bez wideo</p>
           </div>
-          <div className={`bg-white/20 backdrop-blur-sm rounded-2xl p-6 ${theme.textColor}`}>
+          <div className={`bg-white/40 backdrop-blur-sm rounded-2xl p-6 ${theme.textColor} shadow-lg`}>
             <Shield className="w-12 h-12 mx-auto mb-3" />
             <h3 className="font-bold text-lg mb-2">Bezpieczne treści</h3>
-            <p className="text-sm opacity-90">Filtrowanie i kontrola rodzicielska</p>
+            <p className="text-sm opacity-75">Filtrowanie i kontrola rodzicielska</p>
           </div>
-          <div className={`bg-white/20 backdrop-blur-sm rounded-2xl p-6 ${theme.textColor}`}>
+          <div className={`bg-white/40 backdrop-blur-sm rounded-2xl p-6 ${theme.textColor} shadow-lg`}>
             <Users className="w-12 h-12 mx-auto mb-3" />
             <h3 className="font-bold text-lg mb-2">Wiele kont</h3>
-            <p className="text-sm opacity-90">Osobne profile dla każdego dziecka</p>
+            <p className="text-sm opacity-75">Osobne profile dla każdego dziecka</p>
           </div>
         </div>
 
